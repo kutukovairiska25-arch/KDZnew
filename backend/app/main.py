@@ -7,6 +7,7 @@ from sqlalchemy import text  # <-- Добавлен импорт text
 from .database import engine, Base, SessionLocal
 from .routers import couriers, orders, auth
 from . import crud
+from .createDbUsers import create_users
 
 # Создаём таблицы в БД при старте
 Base.metadata.create_all(bind=engine)
@@ -19,32 +20,7 @@ with engine.connect() as conn:
 
 
 # Инициализация тестовых пользователей
-def init_db():
-    db = SessionLocal()
-    try:
-        if not crud.get_user_by_username(db, "admin"):
-            crud.create_user(db, username="admin", password="123", role="admin")
-
-        from . import models
-        # Создаем тестового курьера, если его нет
-        if not db.query(models.Courier).filter(models.Courier.courier_id == 1).first():
-            db.add(models.Courier(courier_id=1, courier_type="bike", regions=[1, 2], working_hours=["09:00-18:00"]))
-            db.commit()
-
-        # Привязываем пользователя courier1 к курьеру с ID 1
-        user_courier = crud.get_user_by_username(db, "courier1")
-        if not user_courier:
-            crud.create_user(db, username="courier1", password="123", role="courier", courier_id=1)
-        else:
-            # ИСПРАВЛЕНИЕ: Если пользователь уже существует, но courier_id не проставлен (NULL), обновляем его
-            if user_courier.courier_id is None:
-                user_courier.courier_id = 1
-                db.commit()
-    finally:
-        db.close()
-
-
-init_db()
+create_users()
 
 app = FastAPI(title="Candy Delivery API", version="1.0")
 

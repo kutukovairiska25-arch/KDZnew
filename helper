@@ -1,0 +1,11 @@
+uvicorn app.main:app --reload
+
+    pip freeze > requirements.txt
+pip freeze - Показывает все установленные пакеты с версиями
+> - Перенаправляет вывод в файл
+requirements.txt - Имя файла, куда сохранится список
+    pip install -r requirements.txt
+
+    pytest backend/tests -v
+Флаг -v выводит подробный отчет по каждому тесту
+В PyCharm вы также можете нажать правой кнопкой мыши на папку tests и выбрать Run 'pytest in tests'.

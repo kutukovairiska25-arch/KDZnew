@@ -1,0 +1,28 @@
+backend/tests/test_auth.py::test_login_success PASSED                                                                                                                        [  9%]
+backend/tests/test_auth.py::test_login_invalid_password PASSED                                                                                                               [ 18%]
+backend/tests/test_auth.py::test_login_nonexistent_user PASSED                                                                                                               [ 27%]
+backend/tests/test_couriers.py::test_import_couriers PASSED                                                                                                                  [ 36%]
+backend/tests/test_couriers.py::test_import_couriers_invalid_data PASSED                                                                                                     [ 45%]
+backend/tests/test_couriers.py::test_get_courier PASSED                                                                                                                      [ 54%]
+backend/tests/test_couriers.py::test_get_courier_not_found PASSED                                                                                                            [ 63%]
+backend/tests/test_couriers.py::test_update_courier PASSED                                                                                                                   [ 72%]
+backend/tests/test_orders.py::test_import_orders PASSED                                                                                                                      [ 81%]
+backend/tests/test_orders.py::test_assign_orders PASSED                                                                                                                      [ 90%]
+backend/tests/test_orders.py::test_complete_order_invalid_state PASSED
+
+FAILURES:
+
+    -- test_import_couriers_invalid_data
+
+Суть: Конструкция return {...}, 400 в FastAPI не устанавливает HTTP-статус, из-за чего сервер вернул 201 вместо 400.
+Решение: Заменено на JSONResponse(status_code=400, content=...).
+
+    -- test_get_courier
+
+Суть: Использование **courier.__dict__ добавляет служебные поля SQLAlchemy, что вызвало KeyError.
+Решение: Словарь ответа сформирован вручную с явным указанием всех нужных полей.
+
+    -- test_update_courier
+
+Суть: Та же проблема с **courier.__dict__, что и в ошибке 2.
+Решение: Словарь ответа сформирован вручную с явным указанием всех нужных полей.
