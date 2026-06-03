@@ -15,21 +15,20 @@ FAILURES:
     -- test_import_couriers_invalid_data
 
 admin_headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc4MDUxNzc4Mn0.dIxihNZVS3hCGFCX5CSmuI9X2KktDBY1RxW2Eqo-mhw', 'Content-Type': 'application/json'}
-
     def test_import_couriers_invalid_data(admin_headers):
         payload = {"data": [{"courier_id": -1, "courier_type": "invalid", "regions": [], "working_hours": []}]}
         resp = requests.post(f"{BASE_URL}/couriers", json=payload, headers=admin_headers)
 >       assert resp.status_code == 400
 E       assert 201 == 400
 E        +  where 201 = <Response [201]>.status_code
-
 backend\tests\test_couriers.py:15: AssertionError
+
+Тест ожидал HTTP статус 400 (Bad Request) при импорте невалидных данных курьера, но сервер вернул 201 (Created).
 
 
     -- test_get_courier
 
 admin_headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc4MDUxNzc4Mn0.dIxihNZVS3hCGFCX5CSmuI9X2KktDBY1RxW2Eqo-mhw', 'Content-Type': 'application/json'}
-
     def test_get_courier(admin_headers):
         courier_id = 1
         resp = requests.get(f"{BASE_URL}/couriers/{courier_id}", headers=admin_headers)
@@ -37,14 +36,14 @@ admin_headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e
 >       assert resp.json()["courier_id"] == courier_id
                ^^^^^^^^^^^^^^^^^^^^^^^^^
 E       KeyError: 'courier_id'
-
 backend\tests\test_couriers.py:21: KeyError
+
+Тест упал с ошибкой KeyError: 'courier_id' при попытке прочитать поле из ответа сервера.
 
 
     -- test_update_courier
 
 admin_headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc4MDUxNzc4Mn0.dIxihNZVS3hCGFCX5CSmuI9X2KktDBY1RxW2Eqo-mhw', 'Content-Type': 'application/json'}
-
     def test_update_courier(admin_headers):
         courier_id = 1
         payload = {"courier_type": "car", "regions": [1, 2, 3]}
@@ -53,8 +52,9 @@ admin_headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e
 >       assert resp.json()["courier_type"] == "car"
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 E       KeyError: 'courier_type'
-
 backend\tests\test_couriers.py:32: KeyError
+
+Тест упал с ошибкой KeyError: 'courier_type' при проверке обновлённых данных курьера.
 
 
     -- short test summary info
