@@ -6,6 +6,9 @@ from .. import crud, schemas, models, utils
 
 router = APIRouter()
 
+@router.get("/orders")
+def get_all_orders(db: Session = Depends(get_db)):
+    return db.query(models.Order).all()
 
 @router.post("/orders", status_code=201)
 def import_orders(req: dict, db: Session = Depends(get_db)):
@@ -22,7 +25,6 @@ def import_orders(req: dict, db: Session = Depends(get_db)):
     ids = crud.create_orders(db, [schemas.OrderItem(**o) for o in valid])
     return {"orders": [{"id": i} for i in ids]}
 
-
 @router.post("/orders/assign")
 def assign_orders(req: schemas.OrdersAssignPostRequest, db: Session = Depends(get_db)):
     courier = db.query(models.Courier).filter(models.Courier.courier_id == req.courier_id).first()
@@ -32,7 +34,6 @@ def assign_orders(req: schemas.OrdersAssignPostRequest, db: Session = Depends(ge
     active = [o for o in assigned if o.status == "assigned"]
     if active:
         return {"orders": [{"id": o.order_id} for o in active], "assign_time": assigned[0].assign_time.isoformat()}
-
     capacity = utils.COURIER_CAPACITY.get(courier.courier_type, 10)
     available = db.query(models.Order).filter(models.Order.status == "new").all()
     to_assign = [o for o in available if o.weight <= capacity and o.region in courier.regions and any(
@@ -45,7 +46,6 @@ def assign_orders(req: schemas.OrdersAssignPostRequest, db: Session = Depends(ge
         o.status, o.assigned_courier_id, o.assign_time, o.courier_type_at_assign = "assigned", courier.courier_id, now, courier.courier_type
     db.commit()
     return {"orders": [{"id": o.order_id} for o in to_assign], "assign_time": now.isoformat()}
-
 
 @router.post("/orders/complete")
 def complete_order(req: schemas.OrdersCompletePostRequest, db: Session = Depends(get_db)):

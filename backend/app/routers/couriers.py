@@ -5,6 +5,24 @@ from .. import crud, schemas, models, utils
 
 router = APIRouter()
 
+@router.get("/couriers")
+def get_all_couriers(db: Session = Depends(get_db)):
+    couriers = crud.get_all_couriers(db)
+    result = []
+    for c in couriers:
+        completed = [o for o in crud.get_courier_orders(db, c.courier_id) if o.status == "completed"]
+        c.rating = utils.calculate_rating(completed)
+        c.earnings = utils.calculate_earnings(completed)
+        result.append({
+            "courier_id": c.courier_id,
+            "courier_type": c.courier_type,
+            "regions": c.regions,
+            "working_hours": c.working_hours,
+            "rating": c.rating,
+            "earnings": c.earnings
+        })
+    return result
+
 @router.post("/couriers", status_code=201)
 def import_couriers(req: dict, db: Session = Depends(get_db)):
     data = req.get("data", [])
@@ -25,7 +43,6 @@ def update_courier(courier_id: int, req: schemas.CourierUpdateRequest, db: Sessi
     courier = crud.update_courier(db, courier_id, req)
     if not courier:
         raise HTTPException(404, "Courier not found")
-    # Снятие заказов при изменении параметров
     new_cap = utils.COURIER_CAPACITY.get(courier.courier_type, 10)
     for order in db.query(models.Order).filter(models.Order.assigned_courier_id == courier_id, models.Order.status == "assigned").all():
         if order.weight > new_cap or order.region not in courier.regions:
@@ -43,3 +60,7 @@ def get_courier(courier_id: int, db: Session = Depends(get_db)):
     courier.earnings = utils.calculate_earnings(completed)
     db.commit()
     return {**courier.__dict__, "rating": courier.rating, "earnings": courier.earnings}
+
+@router.get("/couriers/{courier_id}/orders")
+def get_courier_orders(courier_id: int, db: Session = Depends(get_db)):
+    return crud.get_courier_orders(db, courier_id)
