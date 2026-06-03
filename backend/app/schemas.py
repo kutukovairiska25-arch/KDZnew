@@ -9,6 +9,7 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str
     role: str
+    courier_id: Optional[int] = None
 
 class CourierItem(BaseModel):
     courier_id: int = Field(..., gt=0)

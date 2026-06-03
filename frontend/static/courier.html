@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="dashboard-container">
+        <!-- Боковая панель -->
         <aside class="sidebar">
             <h2>Candy Courier</h2>
             <nav>
@@ -18,21 +19,25 @@
             </nav>
             <button id="logoutBtn" class="logout-btn">Выйти</button>
         </aside>
+
+        <!-- Основной контент -->
         <main class="main-content">
+            <!-- Секция: Профиль -->
             <section id="profile-section" class="content-section active">
                 <h1>Профиль курьера</h1>
                 <div class="profile-info">
                     <p><strong>ID:</strong> <span id="courierId">-</span></p>
                     <p><strong>Тип:</strong> <span id="courierType">-</span></p>
                     <p><strong>Рейтинг:</strong> <span id="courierRating">-</span></p>
-                    <p><strong>Заработок:</strong> <span id="courierEarnings">-</span> ₽</p>
+                    <p><strong>Заработок:</strong> <span id="courierEarnings">0</span> ₽</p>
                 </div>
                 <button id="getOrdersBtn" class="action-btn">Получить заказы</button>
             </section>
 
+            <!-- Секция: Мои заказы -->
             <section id="orders-section" class="content-section">
                 <h1>Мои заказы</h1>
-                <table id="myOrdersTable" class="data-table">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -43,12 +48,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Данные будут загружены через JS -->
+                        <!-- JavaScript автоматически заполнит эту часть -->
                     </tbody>
                 </table>
             </section>
         </main>
     </div>
+
+    <!-- Подключение скрипта -->
     <script src="/static/courier.js"></script>
 </body>
 </html>

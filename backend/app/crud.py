@@ -4,12 +4,18 @@ from . import models, schemas
 def get_user_by_username(db: Session, username: str):
     return db.query(models.User).filter(models.User.username == username).first()
 
-def create_user(db: Session, username: str, password: str, role: str) -> models.User:
-    db_user = models.User(username=username, password=password, role=role)
+def create_user(db: Session, username: str, password: str, role: str, courier_id: int = None) -> models.User:
+    db_user = models.User(username=username, password=password, role=role, courier_id=courier_id)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
+
+def get_all_couriers(db: Session) -> list[models.Courier]:
+    return db.query(models.Courier).all()
+
+def get_all_orders(db: Session) -> list[models.Order]:
+    return db.query(models.Order).all()
 
 def create_couriers(db: Session, data: list[schemas.CourierItem]) -> list[int]:
     ids = []

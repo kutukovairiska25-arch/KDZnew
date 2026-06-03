@@ -1,7 +1,4 @@
-// frontend/static/courier.js
-
 document.addEventListener('DOMContentLoaded', () => {
-    // Проверка авторизации
     const token = localStorage.getItem('access_token');
     const role = localStorage.getItem('role');
     const courierId = localStorage.getItem('courier_id');
@@ -11,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Навигация по разделам
     const navLinks = document.querySelectorAll('.sidebar nav a');
     const sections = document.querySelectorAll('.content-section');
 
@@ -19,38 +15,30 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const targetId = link.getAttribute('href').substring(1);
-
             navLinks.forEach(l => l.classList.remove('active'));
             sections.forEach(s => s.classList.remove('active'));
-
             link.classList.add('active');
             document.getElementById(`${targetId}-section`).classList.add('active');
         });
     });
 
-    // Выход
     document.getElementById('logoutBtn').addEventListener('click', () => {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('role');
-        localStorage.removeItem('courier_id');
+        localStorage.clear();
         window.location.href = '/';
     });
 
-    // Загрузка профиля курьера
     async function loadCourierProfile() {
         try {
             const response = await fetch(`http://127.0.0.1:8000/couriers/${courierId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (response.ok) {
                 const data = await response.json();
                 document.getElementById('courierId').textContent = data.courier_id;
                 document.getElementById('courierType').textContent = data.courier_type;
-                document.getElementById('courierRating').textContent = data.rate || '-';
-                document.getElementById('courierEarnings').textContent = data.earnings || '0';
+                document.getElementById('courierRating').textContent = data.rating !== null ? data.rating : '-'; // Исправлено с data.rate
+                document.getElementById('courierEarnings').textContent = `${data.earnings} ₽`;
             } else {
                 alert('Ошибка загрузки профиля');
             }
@@ -60,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Получение заказов
     document.getElementById('getOrdersBtn').addEventListener('click', async () => {
         try {
             const response = await fetch('http://127.0.0.1:8000/orders/assign', {
@@ -74,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 const data = await response.json();
-                alert(`Назначено заказов: ${data.order_ids ? data.order_ids.length : 0}`);
+                alert(`Назначено заказов: ${data.orders ? data.orders.length : 0}`);
                 loadMyOrders();
             } else {
                 const error = await response.json();
@@ -86,13 +73,82 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Загрузка моих заказов (заглушка для будущей реализации)
     async function loadMyOrders() {
-        console.log('Загрузка заказов курьера...');
-        // TODO: Добавить GET запрос к API для получения списка назначенных заказов
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/couriers/${courierId}/orders`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const orders = await response.json();
+                const tbody = document.querySelector('#orders-section tbody');
+                tbody.innerHTML = '';
+
+                const activeOrders = orders.filter(o => o.status === 'assigned');
+
+                if (activeOrders.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Нет активных заказов</td></tr>';
+                    return;
+                }
+
+                activeOrders.forEach(o => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${o.order_id}</td>
+                        <td>${o.weight} кг</td>
+                        <td>${o.region}</td>
+                        <td>${o.delivery_hours.join(', ')}</td>
+                        <td>
+                            <button class="complete-btn" data-order-id="${o.order_id}">Завершить</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                // Навешиваем обработчики на новые кнопки
+                document.querySelectorAll('.complete-btn').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const orderId = btn.getAttribute('data-order-id');
+                        await completeOrder(orderId);
+                    });
+                });
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки заказов:', error);
+            alert('Ошибка сети при загрузке заказов');
+        }
     }
 
-    // Первоначальная загрузка данных
+    async function completeOrder(orderId) {
+        if (!confirm(`Подтвердить выполнение заказа #${orderId}?`)) return;
+
+        try {
+            const response = await fetch('http://127.0.0.1:8000/orders/complete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    courier_id: parseInt(courierId),
+                    order_id: parseInt(orderId),
+                    complete_time: new Date().toISOString()
+                })
+            });
+
+            if (response.ok) {
+                alert('Заказ успешно завершен');
+                loadMyOrders();
+                loadCourierProfile(); // Обновляем рейтинг и заработок
+            } else {
+                const error = await response.json();
+                alert('Ошибка: ' + (error.detail || 'Не удалось завершить заказ'));
+            }
+        } catch (error) {
+            console.error('Ошибка сети:', error);
+            alert('Ошибка сети');
+        }
+    }
+
     loadCourierProfile();
     loadMyOrders();
 });

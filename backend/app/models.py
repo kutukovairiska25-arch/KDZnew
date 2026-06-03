@@ -7,6 +7,7 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
     role = Column(String, nullable=False)
+    courier_id = Column(Integer, nullable=True) # Связь с профилем курьера
 
 class Courier(Base):
     __tablename__ = "couriers"

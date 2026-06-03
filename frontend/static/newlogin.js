@@ -14,23 +14,21 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('http://127.0.0.1:8000/api/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    username: username,
-                    password: password
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
             });
 
             if (response.ok) {
                 const data = await response.json();
 
-                // Сохраняем токен и роль в localStorage
+                // Сохраняем данные в точном соответствии с ожиданиями кода напарницы
                 localStorage.setItem('access_token', data.access_token);
-                localStorage.setItem('user_role', data.role);
+                localStorage.setItem('role', data.role); // Было user_role, исправлено на role
 
-                // Редирект в зависимости от роли
+                if (data.courier_id) {
+                    localStorage.setItem('courier_id', data.courier_id);
+                }
+
                 if (data.role === 'admin') {
                     window.location.href = '/static/admin.html';
                 } else if (data.role === 'courier') {

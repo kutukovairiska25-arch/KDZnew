@@ -23,5 +23,6 @@ def login(req: schemas.UserLogin, db: Session = Depends(get_db)):
     return {
         "access_token": token,
         "token_type": "bearer",
-        "role": user.role
+        "role": user.role,
+        "courier_id": user.courier_id  # Возвращаем ID курьера
     }
