@@ -1,43 +1,31 @@
 from sqlalchemy.orm import Session
-from . import models
-from app.config import settings
+from . import models, schemas
 
-# Промежуточный класс для унификации результата поиска
-class UserResult:
-    def __init__(self, id, login, password_hash, role, user_type):
-        self.id = id
-        self.login = login
-        self.password_hash = password_hash
-        self.role = role
-        self.user_type = user_type
+def create_couriers(db: Session, data: list[schemas.CourierItem]) -> list[int]:
+    ids = []
+    for c in data:
+        db.add(models.Courier(**c.model_dump()))
+        ids.append(c.courier_id)
+    db.commit()
+    return ids
 
-def get_user_by_login(db: Session, login: str):
-    # 1. Ищем в таблице сотрудников
-    emp = db.query(models.Employee).filter(models.Employee.login == login).first()
-    if emp:
-        return UserResult(
-            id=emp.employees_id,
-            login=emp.login,
-            password_hash=emp.password_hash,
-            role=emp.employees_role,
-            user_type="employee"
-        )
+def update_courier(db: Session, courier_id: int, update_data: schemas.CourierUpdateRequest) -> models.Courier | None:
+    courier = db.query(models.Courier).filter(models.Courier.courier_id == courier_id).first()
+    if not courier:
+        return None
+    for k, v in update_data.model_dump(exclude_unset=True).items():
+        setattr(courier, k, v)
+    db.commit()
+    db.refresh(courier)
+    return courier
 
-    # 2. Ищем в таблице покупателей
-    cust = db.query(models.Customer).filter(models.Customer.login == login).first()
-    if cust:
-        return UserResult(
-            id=cust.customers_id,
-            login=cust.login,
-            password_hash=cust.password_hash,
-            role="customer",
-            user_type="customer"
-        )
+def create_orders(db: Session, data: list[schemas.OrderItem]) -> list[int]:
+    ids = []
+    for o in data:
+        db.add(models.Order(**o.model_dump()))
+        ids.append(o.order_id)
+    db.commit()
+    return ids
 
-    return None
-
-def verify_password(plain_password: str, stored_password: str) -> bool:
-    """
-    Временная проверка без хеширования (для тестов с '123')
-    """
-    return plain_password == stored_password
+def get_courier_orders(db: Session, courier_id: int) -> list[models.Order]:
+    return db.query(models.Order).filter(models.Order.assigned_courier_id == courier_id).all()
