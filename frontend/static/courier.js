@@ -32,19 +32,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`http://127.0.0.1:8000/couriers/${courierId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-
             if (response.ok) {
                 const data = await response.json();
                 document.getElementById('courierId').textContent = data.courier_id;
                 document.getElementById('courierType').textContent = data.courier_type;
-                document.getElementById('courierRating').textContent = data.rating !== null ? data.rating : '-'; // Исправлено с data.rate
-                document.getElementById('courierEarnings').textContent = `${data.earnings} ₽`;
-            } else {
-                alert('Ошибка загрузки профиля');
+                document.getElementById('courierHours').textContent = data.working_hours ? data.working_hours.join(', ') : '-';
+                document.getElementById('courierRating').textContent = data.rating !== null && data.rating !== undefined ? data.rating : '-';
+                document.getElementById('courierEarnings').textContent = data.earnings; // Убрано добавление ₽, так как оно уже есть в HTML
             }
         } catch (error) {
             console.error('Ошибка сети:', error);
-            alert('Ошибка сети');
         }
     }
 
@@ -52,10 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('http://127.0.0.1:8000/orders/assign', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ courier_id: parseInt(courierId) })
             });
 
@@ -69,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Ошибка сети:', error);
-            alert('Ошибка сети');
         }
     });
 
@@ -97,24 +90,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${o.weight} кг</td>
                         <td>${o.region}</td>
                         <td>${o.delivery_hours.join(', ')}</td>
-                        <td>
-                            <button class="complete-btn" data-order-id="${o.order_id}">Завершить</button>
-                        </td>
+                        <td><button class="complete-btn" data-order-id="${o.order_id}">Завершить</button></td>
                     `;
                     tbody.appendChild(tr);
                 });
 
-                // Навешиваем обработчики на новые кнопки
                 document.querySelectorAll('.complete-btn').forEach(btn => {
-                    btn.addEventListener('click', async () => {
-                        const orderId = btn.getAttribute('data-order-id');
-                        await completeOrder(orderId);
-                    });
+                    btn.addEventListener('click', () => completeOrder(btn.dataset.orderId));
                 });
             }
         } catch (error) {
             console.error('Ошибка загрузки заказов:', error);
-            alert('Ошибка сети при загрузке заказов');
         }
     }
 
@@ -124,10 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('http://127.0.0.1:8000/orders/complete', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({
                     courier_id: parseInt(courierId),
                     order_id: parseInt(orderId),
@@ -136,16 +119,15 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok) {
-                alert('Заказ успешно завершен');
+                alert('Заказ завершен');
                 loadMyOrders();
-                loadCourierProfile(); // Обновляем рейтинг и заработок
+                loadCourierProfile();
             } else {
-                const error = await response.json();
-                alert('Ошибка: ' + (error.detail || 'Не удалось завершить заказ'));
+                const err = await response.json();
+                alert('Ошибка: ' + (err.detail || 'Не удалось завершить'));
             }
         } catch (error) {
             console.error('Ошибка сети:', error);
-            alert('Ошибка сети');
         }
     }
 
