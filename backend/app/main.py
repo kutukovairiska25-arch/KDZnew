@@ -7,8 +7,10 @@ from .database import engine, Base, SessionLocal
 from .routers import couriers, orders, auth
 from . import crud
 
+# Создаём таблицы в БД при старте (включая таблицу users)
 Base.metadata.create_all(bind=engine)
 
+# Инициализация тестовых пользователей
 def init_db():
     db = SessionLocal()
     try:
