@@ -1,0 +1,63 @@
+backend/tests/test_auth.py::test_login_success PASSED                                                                                                                        [  9%]
+backend/tests/test_auth.py::test_login_invalid_password PASSED                                                                                                               [ 18%]
+backend/tests/test_auth.py::test_login_nonexistent_user PASSED                                                                                                               [ 27%]
+backend/tests/test_couriers.py::test_import_couriers PASSED                                                                                                                  [ 36%]
+backend/tests/test_couriers.py::test_import_couriers_invalid_data FAILED                                                                                                     [ 45%]
+backend/tests/test_couriers.py::test_get_courier FAILED                                                                                                                      [ 54%]
+backend/tests/test_couriers.py::test_get_courier_not_found PASSED                                                                                                            [ 63%]
+backend/tests/test_couriers.py::test_update_courier FAILED                                                                                                                   [ 72%]
+backend/tests/test_orders.py::test_import_orders PASSED                                                                                                                      [ 81%]
+backend/tests/test_orders.py::test_assign_orders PASSED                                                                                                                      [ 90%]
+backend/tests/test_orders.py::test_complete_order_invalid_state PASSED
+
+FAILURES:
+
+    -- test_import_couriers_invalid_data
+
+admin_headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc4MDUxNzc4Mn0.dIxihNZVS3hCGFCX5CSmuI9X2KktDBY1RxW2Eqo-mhw', 'Content-Type': 'application/json'}
+
+    def test_import_couriers_invalid_data(admin_headers):
+        payload = {"data": [{"courier_id": -1, "courier_type": "invalid", "regions": [], "working_hours": []}]}
+        resp = requests.post(f"{BASE_URL}/couriers", json=payload, headers=admin_headers)
+>       assert resp.status_code == 400
+E       assert 201 == 400
+E        +  where 201 = <Response [201]>.status_code
+
+backend\tests\test_couriers.py:15: AssertionError
+
+
+    -- test_get_courier
+
+admin_headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc4MDUxNzc4Mn0.dIxihNZVS3hCGFCX5CSmuI9X2KktDBY1RxW2Eqo-mhw', 'Content-Type': 'application/json'}
+
+    def test_get_courier(admin_headers):
+        courier_id = 1
+        resp = requests.get(f"{BASE_URL}/couriers/{courier_id}", headers=admin_headers)
+        assert resp.status_code == 200
+>       assert resp.json()["courier_id"] == courier_id
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'courier_id'
+
+backend\tests\test_couriers.py:21: KeyError
+
+
+    -- test_update_courier
+
+admin_headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTc4MDUxNzc4Mn0.dIxihNZVS3hCGFCX5CSmuI9X2KktDBY1RxW2Eqo-mhw', 'Content-Type': 'application/json'}
+
+    def test_update_courier(admin_headers):
+        courier_id = 1
+        payload = {"courier_type": "car", "regions": [1, 2, 3]}
+        resp = requests.patch(f"{BASE_URL}/couriers/{courier_id}", json=payload, headers=admin_headers)
+        assert resp.status_code == 200
+>       assert resp.json()["courier_type"] == "car"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'courier_type'
+
+backend\tests\test_couriers.py:32: KeyError
+
+
+    -- short test summary info
+FAILED backend/tests/test_couriers.py::test_import_couriers_invalid_data - assert 201 == 400
+FAILED backend/tests/test_couriers.py::test_get_courier - KeyError: 'courier_id'
+FAILED backend/tests/test_couriers.py::test_update_courier - KeyError: 'courier_type'
