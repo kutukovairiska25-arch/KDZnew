@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Панель Администратора</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
+        button { padding: 10px 20px; background: #dc3545; color: white; border: none; cursor: pointer; }
+    </style>
+    <script>
+        // Простая проверка авторизации при загрузке
+        if (!localStorage.getItem('access_token') || localStorage.getItem('user_role') !== 'admin') {
+            window.location.href = '/';
+        }
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+    </script>
+</head>
+<body>
+    <div class="header">
+        <h1>Панель Администратора</h1>
+        <button onclick="logout()">Выйти</button>
+    </div>
+    <p>Добро пожаловать, Администратор. Здесь будет функционал импорта курьеров и заказов.</p>
+</body>
+</html>

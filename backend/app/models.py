@@ -1,6 +1,13 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, ARRAY
 from .database import Base
 
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True, nullable=False)
+    password = Column(String, nullable=False)
+    role = Column(String, nullable=False)
+
 class Courier(Base):
     __tablename__ = "couriers"
     courier_id = Column(Integer, primary_key=True, index=True)

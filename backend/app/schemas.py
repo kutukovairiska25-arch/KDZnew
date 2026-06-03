@@ -1,6 +1,15 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+    role: str
+
 class CourierItem(BaseModel):
     courier_id: int = Field(..., gt=0)
     courier_type: str = Field(..., pattern="^(foot|bike|car)$")

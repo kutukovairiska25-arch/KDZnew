@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Панель Курьера</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
+        button { padding: 10px 20px; background: #dc3545; color: white; border: none; cursor: pointer; }
+    </style>
+    <script>
+        if (!localStorage.getItem('access_token') || localStorage.getItem('user_role') !== 'courier') {
+            window.location.href = '/';
+        }
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+    </script>
+</head>
+<body>
+    <div class="header">
+        <h1>Панель Курьера</h1>
+        <button onclick="logout()">Выйти</button>
+    </div>
+    <p>Добро пожаловать, Курьер. Здесь будет список ваших заказов.</p>
+</body>
+</html>
