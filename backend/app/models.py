@@ -5,8 +5,8 @@ class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True, nullable=False)
-    password = Column(String, nullable=False) # Пока без хэша, как указано в задаче
-    role = Column(String, nullable=False) # "admin" или "courier"
+    password = Column(String, nullable=False)
+    role = Column(String, nullable=False)
 
 class Courier(Base):
     __tablename__ = "couriers"
