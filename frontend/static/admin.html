@@ -19,10 +19,11 @@
             </nav>
             <button id="logoutBtn" class="logout-btn">Выйти</button>
         </aside>
+
         <main class="main-content">
             <section id="couriers-section" class="content-section active">
                 <h1>Курьеры</h1>
-                <table id="couriersTable" class="data-table">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -34,15 +35,13 @@
                             <th>Действия</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <!-- Данные будут загружены через JS -->
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </section>
 
             <section id="orders-section" class="content-section">
                 <h1>Заказы</h1>
-                <table id="ordersTable" class="data-table">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -52,9 +51,7 @@
                             <th>Курьер</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <!-- Данные будут загружены через JS -->
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </section>
 
@@ -63,12 +60,12 @@
                 <div class="import-forms">
                     <div class="import-block">
                         <h3>Импорт курьеров</h3>
-                        <textarea id="couriersImportData" placeholder='Введите JSON с курьерами...'></textarea>
+                        <textarea id="couriersImportData" placeholder='[{"courier_id": 1, "courier_type": "bike", "regions": [1, 2], "working_hours": ["09:00-18:00"]}]'></textarea>
                         <button id="importCouriersBtn">Импортировать курьеров</button>
                     </div>
                     <div class="import-block">
                         <h3>Импорт заказов</h3>
-                        <textarea id="ordersImportData" placeholder='Введите JSON с заказами...'></textarea>
+                        <textarea id="ordersImportData" placeholder='[{"order_id": 1, "weight": 10.5, "region": 1, "delivery_hours": ["10:00-12:00"]}]'></textarea>
                         <button id="importOrdersBtn">Импортировать заказы</button>
                     </div>
                 </div>

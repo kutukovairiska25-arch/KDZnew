@@ -8,6 +8,21 @@ from .. import crud, schemas, models, utils
 router = APIRouter()
 
 
+@router.get("/orders")
+def get_all_orders(db: Session = Depends(get_db)):
+    orders = db.query(models.Order).all()
+    return [{
+        "order_id": o.order_id,
+        "weight": o.weight,
+        "region": o.region,
+        "delivery_hours": o.delivery_hours,
+        "status": o.status,
+        "assigned_courier_id": o.assigned_courier_id,
+        "assign_time": str(o.assign_time) if o.assign_time else None,
+        "completion_time": str(o.completion_time) if o.completion_time else None
+    } for o in orders]
+
+
 @router.post("/orders", status_code=201)
 def import_orders(req: dict, db: Session = Depends(get_db)):
     data = req.get("data", [])
@@ -15,9 +30,12 @@ def import_orders(req: dict, db: Session = Depends(get_db)):
     for item in data:
         try:
             schemas.OrderItem(**item)
-            valid.append(item)
-        except Exception:
-            invalid.append(item)
+            if db.query(models.Order).filter(models.Order.order_id == item["order_id"]).first():
+                invalid.append({**item, "error": "Заказ с таким ID уже существует"})
+            else:
+                valid.append(item)
+        except Exception as e:
+            invalid.append({**item, "error": str(e)})
 
     if invalid:
         return JSONResponse(status_code=400, content={"validation_error": {"orders": invalid}})
