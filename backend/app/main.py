@@ -11,8 +11,8 @@ from typing import Optional
 
 from .config import settings
 from .database import get_db, Base
-from . import crud
-from . import models
+from . import crud, models
+from .routers import couriers, orders
 
 app = FastAPI(title="Login System API")
 
@@ -79,24 +79,5 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
     # Сейчас пользователей создавай через SQL-скрипты, как договаривались.
     return {"message": "Регистрация через API пока не реализована."}
 
-'''
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-import uvicorn
-
-app = FastAPI()
-
-# 1. Говорим FastAPI, где лежат файлы
-# А FastAPI говорит серверу: "Если просят картинки или стили — отдай их из папки static".
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# 2. Главная страница
-@app.get("/")
-async def main():
-    # Отдаем файл index.html
-    return FileResponse("static/index.html")
-
-if __name__ == "__main__":
-    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
-'''
+app.include_router(couriers.router)
+app.include_router(orders.router)
