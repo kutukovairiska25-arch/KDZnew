@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
 
+        // Скрипт формирует HTTP-запрос:
         try {
             const response = await fetch('http://127.0.0.1:8000/api/login', {
                 method: 'POST',
@@ -25,8 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 const data = await response.json();
 
-                // Если бэкенд вернул токен, JS сохраняет его в localStorage и
-                // делает window.location.href = '/static/admin.html'
+                // Если бэкенд вернул токен, JS сохраняет его в локальном хранилище браузера localStorage
 
                 localStorage.setItem('access_token', data.access_token);
                 localStorage.setItem('role', data.role);
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Браузер загружает новую страницу, строит новое DOM-дерево
-                // для admin.html, и цикл повторяется.
+                // Скрипт проверяет роль и перенаправляет пользователя
 
                 if (data.role === 'admin') {
                     window.location.href = '/static/admin.html';

@@ -1,6 +1,9 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
+# Optional: Указывает, что поле может быть пустым
 
+
+# Схемы для авторизации
 class UserLogin(BaseModel):
     username: str
     password: str
@@ -11,6 +14,8 @@ class TokenResponse(BaseModel):
     role: str
     courier_id: Optional[int] = None
 
+
+# Схемы для Курьеров
 class CourierItem(BaseModel):
     courier_id: int = Field(..., gt=0)
     courier_type: str = Field(..., pattern="^(foot|bike|car)$")
@@ -30,6 +35,8 @@ class CourierGetResponse(BaseModel):
     earnings: int
     rating: Optional[float] = None
 
+
+# Схемы для Заказов
 class OrderItem(BaseModel):
     order_id: int = Field(..., gt=0)
     weight: float = Field(..., gt=0.0, le=50.0)
