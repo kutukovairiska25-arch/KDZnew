@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pathlib import Path
-from sqlalchemy import text  # <-- Добавлен импорт text
+from sqlalchemy import text
 from .database import engine, Base, SessionLocal
 from .routers import couriers, orders, auth
 from . import crud
@@ -12,7 +12,7 @@ from .createDbUsers import create_users
 # Создаём таблицы в БД при старте
 Base.metadata.create_all(bind=engine)
 
-# АВТОМАТИЧЕСКАЯ МИГРАЦИЯ: Добавляем колонку courier_id, если её нет
+# Добавляем колонку courier_id, если её нет
 # Это нужно, потому что create_all не обновляет уже существующие таблицы
 with engine.connect() as conn:
     conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS courier_id INTEGER"))

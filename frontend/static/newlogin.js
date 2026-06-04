@@ -1,13 +1,17 @@
+// Это событие говорит: "DOM полностью построен, можно вешать обработчики".
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const submitBtn = document.getElementById('submitBtn');
 
+    //  Когда пользователь вводит логин и нажимает кнопку "Sign In", срабатывает событие submit
     loginForm.addEventListener('submit', async function (e) {
         e.preventDefault();
 
         submitBtn.innerText = 'Verifying...';
         submitBtn.disabled = true;
 
+        // JavaScript перехватывает его, достает значения из DOM-элементов (document.getElementById('username').value),
+        // формирует JSON и отправляет fetch-запрос на бэкенд.
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
 
@@ -21,13 +25,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 const data = await response.json();
 
-                // Сохраняем данные в точном соответствии с ожиданиями кода напарницы
+                // Если бэкенд вернул токен, JS сохраняет его в localStorage и
+                // делает window.location.href = '/static/admin.html'
+
                 localStorage.setItem('access_token', data.access_token);
-                localStorage.setItem('role', data.role); // Было user_role, исправлено на role
+                localStorage.setItem('role', data.role);
 
                 if (data.courier_id) {
                     localStorage.setItem('courier_id', data.courier_id);
                 }
+
+                // Браузер загружает новую страницу, строит новое DOM-дерево
+                // для admin.html, и цикл повторяется.
 
                 if (data.role === 'admin') {
                     window.location.href = '/static/admin.html';
