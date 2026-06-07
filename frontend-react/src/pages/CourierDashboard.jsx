@@ -54,21 +54,23 @@ export default function CourierDashboard() {
       try {
         const allOrders = await api.get(`/couriers/${courierId}/orders`);
 
-        // Создаем Map для хранения УНИКАЛЬНЫХ заказов (по order_id)
         const uniqueOrdersMap = new Map();
         allOrders.forEach(order => {
-          // Храним только последнюю версию каждого заказа
           uniqueOrdersMap.set(order.order_id, order);
         });
-
         const uniqueOrders = Array.from(uniqueOrdersMap.values());
 
+        const completed = uniqueOrders.filter(o => o.status === 'completed').length;
+        const cancelled = uniqueOrders.filter(o =>
+          o.cancelled_by_courier_id === parseInt(courierId) && o.status !== 'completed'
+        ).length;
+        const active = uniqueOrders.filter(o => o.status === 'assigned').length;
+
         const statsData = {
-          total: uniqueOrders.length,
-          completed: uniqueOrders.filter(o => o.status === 'completed').length,
-          // Считаем отмененными заказы, где cancelled_by_courier_id === courierId
-          cancelled: uniqueOrders.filter(o => o.cancelled_by_courier_id === parseInt(courierId)).length,
-          active: uniqueOrders.filter(o => o.status === 'assigned').length
+          total: completed + cancelled + active,
+          completed,
+          cancelled,
+          active
         };
 
         setStats(statsData);
@@ -84,14 +86,17 @@ export default function CourierDashboard() {
         });
 
         const orderIds = response.orders || [];
+        const isNewlyAssigned = response.newly_assigned !== false;
 
-        if (orderIds.length === 0) {
+        if (!isNewlyAssigned) {
+          alert(`У вас уже есть ${orderIds.length} активных заказов. Завершите или отмените их, чтобы получить новые.`);
+        } else if (orderIds.length === 0) {
           alert('Нет доступных заказов для назначения');
         } else {
           alert(`Назначено заказов: ${orderIds.length}`);
-          loadOrders();
-          loadStats();
         }
+        loadOrders();
+        loadStats();
       } catch (error) {
         // Здесь будет показана ошибка о лимите в 3 заказа
         alert('Ошибка получения заказов: ' + error.message);
@@ -168,11 +173,21 @@ export default function CourierDashboard() {
                   </div>
                   <div style={{ padding: '20px', background: 'linear-gradient(135deg, #FFD6E0 0%, #FFB6C1 100%)', borderRadius: '16px', color: 'white', boxShadow: '0 8px 24px rgba(255, 214, 224, 0.3)' }}>
                     <div style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: '8px' }}>Рейтинг</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{profile.rating || '5.0'} ⭐</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>
+                      {profile.rating !== null && profile.rating !== undefined ? `${profile.rating} ⭐` : '-'}
+                    </div>
                   </div>
                   <div style={{ padding: '20px', background: 'linear-gradient(135deg, #87CEEB 0%, #B6E2FF 100%)', borderRadius: '16px', color: 'white', boxShadow: '0 8px 24px rgba(135, 206, 235, 0.3)' }}>
                     <div style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: '8px' }}>Заработок</div>
                     <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{profile.earnings || 0} ₽</div>
+                  </div>
+                  <div style={{ padding: '20px', background: 'linear-gradient(135deg, #FFB6C1 0%, #FFD6E0 100%)', borderRadius: '16px', color: 'white', boxShadow: '0 8px 24px rgba(255, 182, 193, 0.3)' }}>
+                    <div style={{ fontSize: '0.9rem', opacity: '0.9', marginBottom: '8px' }}>🕐 Рабочие часы</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: '600', marginTop: '8px' }}>
+                      {profile.working_hours && profile.working_hours.length > 0
+                        ? profile.working_hours.join(', ')
+                        : 'Не указаны'}
+                    </div>
                   </div>
                 </div>
             </div>

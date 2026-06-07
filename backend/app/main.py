@@ -1,8 +1,8 @@
 from fastapi import FastAPI     # основной фреймворк для создания REST API
 from fastapi.middleware.cors import CORSMiddleware  # для запросов с других адресов
-from .database import engine, Base
+from db.database import engine, Base
 from .routers import couriers, orders, auth
-from .createDbUsers import create_users, reset_database     # создаёт тестовых пользователей
+from db.createDbUsers import create_users, reset_database     # создаёт тестовых пользователей
 
 # Создаём таблицы в БД при старте
 Base.metadata.create_all(bind=engine)
@@ -20,7 +20,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",  # React dev server
         "http://127.0.0.1:5173",  # React dev server (альтернатива)
-        "http://localhost:3000",  # если будешь использовать другой порт
+        "http://localhost:3000",
     ],
     allow_credentials=True,
     allow_methods=["*"],

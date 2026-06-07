@@ -21,14 +21,18 @@ export const api = {
         throw new Error('Сессия истекла. Войдите снова.');
       }
 
+      // Читаем тело ответа ОДИН РАЗ и сохраняем в переменную
+      const responseText = await response.text();
+
       if (!response.ok) {
         let errorMessage = `Ошибка ${response.status}`;
         try {
-          const errorData = await response.json();
-          errorMessage = errorData.detail || errorMessage;
+          // Пытаемся распарсить сохранённый текст как JSON
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.detail || errorData.message || errorMessage;
         } catch (e) {
-          const errorText = await response.text();
-          errorMessage = errorText || errorMessage;
+          // Если не JSON - используем как есть
+          errorMessage = responseText || errorMessage;
         }
         throw new Error(errorMessage);
       }
@@ -37,7 +41,13 @@ export const api = {
         return null;
       }
 
-      return await response.json();
+      // Парсим сохранённый текст как JSON
+      try {
+        return responseText ? JSON.parse(responseText) : null;
+      } catch (e) {
+        console.error('Failed to parse JSON response:', e);
+        return null;
+      }
 
     } catch (error) {
       console.error('API Error:', error);
@@ -55,5 +65,9 @@ export const api = {
   patch: (endpoint, data) => api.request(endpoint, {
     method: 'PATCH',
     body: JSON.stringify(data),
+  }),
+
+  delete: (endpoint) => api.request(endpoint, {
+    method: 'DELETE',
   }),
 };

@@ -4,7 +4,7 @@
 """
 
 from datetime import datetime
-from . import models
+from db import models
 
 COURIER_COEFF = {"foot": 2, "bike": 5, "car": 9}
 COURIER_CAPACITY = {"foot": 10, "bike": 15, "car": 50}

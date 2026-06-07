@@ -4,7 +4,8 @@
 """
 
 from sqlalchemy.orm import Session
-from . import models, schemas
+from app import schemas
+from db import models
 from typing import List
 
 def get_user_by_username(db: Session, username: str):

@@ -4,7 +4,7 @@
 
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, ARRAY
 # ForeignKey: Механизм связывания таблиц. Гарантирует целостность данных
-from .database import Base
+from db.database import Base
 
 class User(Base):
     __tablename__ = "users"

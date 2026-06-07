@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from datetime import datetime
-from ..database import get_db
-from .. import crud, schemas, models, utils
+from datetime import datetime, timezone
+from db.database import get_db
+from .. import schemas
+from db import models, crud, utils
 
 # Позволяет вынести маршруты, связанные с курьерами, в отдельный файл
 router = APIRouter()
@@ -72,7 +73,8 @@ def assign_orders(req: schemas.OrdersAssignPostRequest, db: Session = Depends(ge
         )
 
     if active:
-        return {"orders": [{"id": o.order_id} for o in active], "assign_time": active[0].assign_time.isoformat()}
+        return {"orders": [{"id": o.order_id} for o in active], "assign_time": active[0].assign_time.isoformat(),
+                "newly_assigned": False}
 
     # Определяем, сколько еще заказов можно назначить
     slots_available = MAX_ACTIVE_ORDERS - len(active)
@@ -90,7 +92,7 @@ def assign_orders(req: schemas.OrdersAssignPostRequest, db: Session = Depends(ge
         return {"orders": []}
 
     # 6. Назначаем заказы: меняем статус, привязываем курьера, фиксируем время и тип курьера
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     for o in to_assign:
         o.status = "assigned"
         o.assigned_courier_id = courier.courier_id
@@ -98,7 +100,7 @@ def assign_orders(req: schemas.OrdersAssignPostRequest, db: Session = Depends(ge
         o.courier_type_at_assign = courier.courier_type
 
     db.commit()
-    return {"orders": [{"id": o.order_id} for o in to_assign], "assign_time": now.isoformat()}
+    return {"orders": [{"id": o.order_id} for o in to_assign], "assign_time": now.isoformat(), "newly_assigned": True}
 
 
 # Завершение заказа
@@ -146,3 +148,26 @@ async def cancel_order(
     db.refresh(order)
 
     return {"message": "Заказ отменён", "order_id": order_id}
+
+
+@router.delete("/orders/{order_id}")
+def delete_order(order_id: int, db: Session = Depends(get_db)):
+    """
+    Удаление заказа администратором
+    """
+    order = db.query(models.Order).filter(models.Order.order_id == order_id).first()
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Заказ не найден")
+
+    # Проверяем, что заказ не назначен курьеру (нельзя удалить активный заказ)
+    if order.status == "assigned":
+        raise HTTPException(
+            status_code=400,
+            detail="Нельзя удалить назначенный заказ. Сначала отмените его."
+        )
+
+    db.delete(order)
+    db.commit()
+
+    return {"message": f"Заказ #{order_id} удалён", "order_id": order_id}

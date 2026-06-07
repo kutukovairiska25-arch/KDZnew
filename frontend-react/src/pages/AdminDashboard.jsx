@@ -14,12 +14,6 @@ export default function AdminDashboard() {
     "courier_type": "bike",
     "regions": [1, 2],
     "working_hours": ["09:00-18:00"]
-  },
-  {
-    "courier_id": 2,
-    "courier_type": "foot",
-    "regions": [1],
-    "working_hours": ["10:00-16:00"]
   }
 ]`);
 
@@ -29,18 +23,6 @@ const [ordersImport, setOrdersImport] = useState(`[
     "weight": 2.5,
     "region": 1,
     "delivery_hours": ["10:00-12:00"]
-  },
-  {
-    "order_id": 2,
-    "weight": 1.0,
-    "region": 2,
-    "delivery_hours": ["14:00-16:00"]
-  },
-  {
-    "order_id": 3,
-    "weight": 3.7,
-    "region": 1,
-    "delivery_hours": ["09:00-11:00"]
   }
 ]`);
   const [editingCourier, setEditingCourier] = useState(null);
@@ -92,7 +74,6 @@ const [ordersImport, setOrdersImport] = useState(`[
       const parsedData = JSON.parse(couriersImport);
       await api.post('/couriers', { data: parsedData });
       alert('Курьеры успешно импортированы');
-      setCouriersImport('');
       loadCouriers();
     } catch (e) {
       alert('Ошибка: ' + e.message);
@@ -109,13 +90,24 @@ const [ordersImport, setOrdersImport] = useState(`[
       const parsedData = JSON.parse(ordersImport);
       await api.post('/orders', { data: parsedData });
       alert('Заказы успешно импортированы');
-      setOrdersImport('');
       loadOrders();
     } catch (e) {
       alert('Ошибка: ' + e.message);
     }
   };
+    const handleDeleteOrder = async (orderId) => {
+      if (!confirm(`Удалить заказ #${orderId}? Это действие нельзя отменить.`)) {
+        return;
+      }
 
+      try {
+        await api.delete(`/orders/${orderId}`);
+        alert(`Заказ #${orderId} удалён`);
+        loadOrders();
+      } catch (error) {
+        alert('Ошибка удаления заказа: ' + error.message);
+      }
+    };
   const handleEditCourier = (courier) => {
     setEditingCourier(courier);
     setEditForm({
@@ -236,6 +228,7 @@ const [ordersImport, setOrdersImport] = useState(`[
                       <th>Регион</th>
                       <th>Статус</th>
                       <th>Курьер</th>
+                      <th>Действия</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -246,6 +239,17 @@ const [ordersImport, setOrdersImport] = useState(`[
                         <td>{order.region}</td>
                         <td>{order.status}</td>
                         <td>{order.assigned_courier_id || '-'}</td>
+                        <td>
+                          <button
+                            onClick={() => handleDeleteOrder(order.order_id)}
+                            className="action-btn"
+                            style={{
+                              background: 'linear-gradient(135deg, #FF6B9D 0%, #FF8FB1 100%)'
+                            }}
+                          >
+                            🗑️ Удалить
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

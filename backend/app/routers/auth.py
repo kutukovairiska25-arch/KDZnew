@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 import jwt
-from ..database import get_db
-from .. import crud, schemas
+from db.database import get_db
+from .. import schemas
+from db import crud
 from ..config import settings
 
 router = APIRouter(prefix="/api", tags=["auth"])
