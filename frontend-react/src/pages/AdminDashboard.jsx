@@ -14,12 +14,6 @@ export default function AdminDashboard() {
     "courier_type": "bike",
     "regions": [1, 2],
     "working_hours": ["09:00-18:00"]
-  },
-  {
-    "courier_id": 2,
-    "courier_type": "foot",
-    "regions": [1],
-    "working_hours": ["10:00-16:00"]
   }
 ]`);
 
@@ -29,18 +23,6 @@ const [ordersImport, setOrdersImport] = useState(`[
     "weight": 2.5,
     "region": 1,
     "delivery_hours": ["10:00-12:00"]
-  },
-  {
-    "order_id": 2,
-    "weight": 1.0,
-    "region": 2,
-    "delivery_hours": ["14:00-16:00"]
-  },
-  {
-    "order_id": 3,
-    "weight": 3.7,
-    "region": 1,
-    "delivery_hours": ["09:00-11:00"]
   }
 ]`);
   const [editingCourier, setEditingCourier] = useState(null);
@@ -92,7 +74,6 @@ const [ordersImport, setOrdersImport] = useState(`[
       const parsedData = JSON.parse(couriersImport);
       await api.post('/couriers', { data: parsedData });
       alert('Курьеры успешно импортированы');
-      setCouriersImport('');
       loadCouriers();
     } catch (e) {
       alert('Ошибка: ' + e.message);
@@ -109,7 +90,6 @@ const [ordersImport, setOrdersImport] = useState(`[
       const parsedData = JSON.parse(ordersImport);
       await api.post('/orders', { data: parsedData });
       alert('Заказы успешно импортированы');
-      setOrdersImport('');
       loadOrders();
     } catch (e) {
       alert('Ошибка: ' + e.message);

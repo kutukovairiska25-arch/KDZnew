@@ -1,5 +1,5 @@
 uvicorn app.main:app --reload
-
+npm run dev
     pip freeze > requirements.txt
 pip freeze - Показывает все установленные пакеты с версиями
 > - Перенаправляет вывод в файл
