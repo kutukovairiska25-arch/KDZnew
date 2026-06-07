@@ -1,0 +1,236 @@
+openapi: 3.0.3
+info:
+  title: Candy Delivery API
+  description: REST API для управления курьерами и заказами службы доставки.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:8000
+    description: Local development server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UserLogin:
+      type: object
+      properties:
+        username: { type: string }
+        password: { type: string }
+      required: [username, password]
+    TokenResponse:
+      type: object
+      properties:
+        access_token: { type: string }
+        token_type: { type: string }
+        role: { type: string }
+        courier_id: { type: integer, nullable: true }
+    CourierItem:
+      type: object
+      properties:
+        courier_id: { type: integer, minimum: 1 }
+        courier_type: { type: string, pattern: "^(foot|bike|car)$" }
+        regions: { type: array, items: { type: integer }, minItems: 1 }
+        working_hours: { type: array, items: { type: string }, minItems: 1 }
+      required: [courier_id, courier_type, regions, working_hours]
+    CourierUpdateRequest:
+      type: object
+      properties:
+        courier_type: { type: string, nullable: true }
+        regions: { type: array, items: { type: integer }, nullable: true }
+        working_hours: { type: array, items: { type: string }, nullable: true }
+    CourierGetResponse:
+      type: object
+      properties:
+        courier_id: { type: integer }
+        courier_type: { type: string }
+        regions: { type: array, items: { type: integer } }
+        working_hours: { type: array, items: { type: string } }
+        earnings: { type: integer }
+        rating: { type: number, format: float, nullable: true }
+    OrderItem:
+      type: object
+      properties:
+        order_id: { type: integer, minimum: 1 }
+        weight: { type: number, format: float, minimum: 0.01, maximum: 50.0 }
+        region: { type: integer, minimum: 1 }
+        delivery_hours: { type: array, items: { type: string }, minItems: 1 }
+      required: [order_id, weight, region, delivery_hours]
+    OrdersAssignPostRequest:
+      type: object
+      properties:
+        courier_id: { type: integer, minimum: 1 }
+      required: [courier_id]
+    OrdersCompletePostRequest:
+      type: object
+      properties:
+        courier_id: { type: integer, minimum: 1 }
+        order_id: { type: integer, minimum: 1 }
+        complete_time: { type: string, format: date-time }
+      required: [courier_id, order_id, complete_time]
+
+paths:
+  /api/login:
+    post:
+      summary: Авторизация пользователя
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserLogin' }
+      responses:
+        200:
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenResponse' }
+        401:
+          description: Неверные учетные данные
+
+  /couriers:
+    get:
+      summary: Получить список всех курьеров
+      tags: [couriers]
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Список курьеров
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CourierGetResponse' }
+    post:
+      summary: Импорт списка курьеров
+      tags: [couriers]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items: { $ref: '#/components/schemas/CourierItem' }
+      responses:
+        201:
+          description: Курьеры успешно импортированы
+        400:
+          description: Ошибка валидации данных
+
+  /couriers/{courier_id}:
+    get:
+      summary: Получить информацию о конкретном курьере
+      tags: [couriers]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: courier_id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        200:
+          description: Данные курьера
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CourierGetResponse' }
+        404:
+          description: Курьер не найден
+    patch:
+      summary: Обновить данные курьера
+      tags: [couriers]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: courier_id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CourierUpdateRequest' }
+      responses:
+        200:
+          description: Данные обновлены
+        404:
+          description: Курьер не найден
+
+  /couriers/{courier_id}/orders:
+    get:
+      summary: Получить заказы, назначенные курьеру
+      tags: [couriers]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: courier_id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        200:
+          description: Список заказов курьера
+
+  /orders:
+    get:
+      summary: Получить список всех заказов
+      tags: [orders]
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Список заказов
+    post:
+      summary: Импорт списка заказов
+      tags: [orders]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items: { $ref: '#/components/schemas/OrderItem' }
+      responses:
+        201:
+          description: Заказы успешно импортированы
+        400:
+          description: Ошибка валидации данных
+
+  /orders/assign:
+    post:
+      summary: Назначить доступные заказы курьеру
+      tags: [orders]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OrdersAssignPostRequest' }
+      responses:
+        200:
+          description: Заказы назначены
+        400:
+          description: Курьер не найден
+
+  /orders/complete:
+    post:
+      summary: Отметить заказ как выполненный
+      tags: [orders]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OrdersCompletePostRequest' }
+      responses:
+        200:
+          description: Заказ завершен
+        400:
+          description: Неверный заказ или состояние

@@ -1,23 +1,14 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-from pathlib import Path
-from sqlalchemy import text  # <-- Добавлен импорт text
-from .database import engine, Base, SessionLocal
+from fastapi import FastAPI     # основной фреймворк для создания REST API
+from fastapi.middleware.cors import CORSMiddleware  # для запросов с других адресов
 from .routers import couriers, orders, auth
-from . import crud
-from .createDbUsers import create_users
+from .db.database import engine, Base
+from .db.createDbUsers import create_users, reset_database    # создаёт тестовых пользователей
 
 # Создаём таблицы в БД при старте
 Base.metadata.create_all(bind=engine)
 
-# АВТОМАТИЧЕСКАЯ МИГРАЦИЯ: Добавляем колонку courier_id, если её нет
-# Это нужно, потому что create_all не обновляет уже существующие таблицы
-with engine.connect() as conn:
-    conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS courier_id INTEGER"))
-    conn.commit()
-
+# Сброс базы данных (для разработки)
+reset_database()
 
 # Инициализация тестовых пользователей
 create_users()
@@ -26,23 +17,45 @@ app = FastAPI(title="Candy Delivery API", version="1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",  # React dev server
+        "http://127.0.0.1:5173",  # React dev server (альтернатива)
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-STATIC_DIR = Path(__file__).resolve().parents[2] / "frontend" / "static"
 
-
-@app.get("/")
-async def main():
-    index_path = STATIC_DIR / "index.html"
-    return FileResponse(index_path)
-
-
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-
+# Подключаем роутер авторизации, курьеров и заказов
 app.include_router(auth.router)
 app.include_router(couriers.router)
 app.include_router(orders.router)
+
+'''
+from fastapi.staticfiles import StaticFiles   # позволяет FastAPI раздавать статические файлы
+from fastapi.responses import FileResponse  # возвращает клиенту файл (например, index.html)
+from pathlib import Path
+
+# __file__ — это путь к текущему файлу (main.py).
+# .resolve() — превращает относительный путь в абсолютный.
+# .parents[2] — поднимаемся на 2 уровня вверх:
+# Затем спускаемся в frontend/static.
+staticDir = Path(__file__).resolve().parents[2] / "frontend" / "static"
+
+# Эндпоинт GET / — корень сайта.
+# Когда пользователь открывает http://127.0.0.1:8000/, он получает файл index.html.
+# FileResponse — это специальный ответ FastAPI, который просто отдаёт файл.
+@app.get("/")
+async def main():
+    index_path = staticDir / "index.html"
+    return FileResponse(index_path)
+    
+# Монтируем папку static по адресу /static.
+# Если браузер запросит http://127.0.0.1:8000/static/newlogin.css,
+# FastAPI найдёт файл frontend/static/newlogin.css и отдаст его.
+# name="static" — внутреннее имя для этого "маршрута".
+app.mount("/static", StaticFiles(directory=staticDir), name="static")
+
+'''

@@ -1,0 +1,181 @@
+/* CourierDashboard.css */
+
+.courier-page {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #FFE5EC 0%, #E0F7FF 50%, #FFD6E0 100%);
+    background-attachment: fixed;
+    font-family: 'MyCustomFont', 'Poppins', sans-serif;
+}
+
+.profile-card {
+    background: linear-gradient(135deg, #FFE5EC 0%, #E0F7FF 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(255, 182, 193, 0.2);
+}
+
+.profile-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.profile-item {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.profile-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(255, 182, 193, 0.3);
+}
+
+.profile-item .label {
+    font-size: 0.9rem;
+    color: #5A6B7C;
+    margin-bottom: 8px;
+    opacity: 0.8;
+}
+
+.profile-item .value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #FF6B9D;
+}
+
+.get-orders-btn {
+    padding: 16px 32px;
+    background: linear-gradient(135deg, #FFB6C1 0%, #B6E2FF 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 182, 193, 0.4);
+}
+
+.get-orders-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 182, 193, 0.5);
+}
+
+/* Таблица заказов */
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(182, 226, 255, 0.3);
+}
+
+.orders-table thead {
+    background: linear-gradient(135deg, #FFB6C1 0%, #B6E2FF 100%);
+}
+
+.orders-table th {
+    padding: 18px 20px;
+    color: white;
+    font-weight: 600;
+    text-align: left;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+.orders-table td {
+    padding: 16px 20px;
+    color: #5A6B7C;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.orders-table tbody tr:hover {
+    background: rgba(255, 182, 193, 0.2);
+}
+
+/* Кнопки действий */
+.complete-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #B6E2FF 0%, #87CEEB 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-right: 10px;
+}
+
+.complete-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(182, 226, 255, 0.4);
+}
+
+.cancel-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #FF6B9D 0%, #FF8FB1 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 157, 0.4);
+}
+
+/* Статистика */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(255, 182, 193, 0.3);
+}
+
+.stat-card .icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.stat-card .label {
+    font-size: 0.9rem;
+    color: #5A6B7C;
+    margin-bottom: 8px;
+}
+
+.stat-card .value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #FF6B9D;
+}

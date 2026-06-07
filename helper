@@ -1,4 +1,9 @@
-uvicorn app.main:app --reload
+    backend
+uvicorn backend.app.main:app --reload
+
+    frontend
+cd frontend-react
+npm run dev
 
     pip freeze > requirements.txt
 pip freeze - Показывает все установленные пакеты с версиями
