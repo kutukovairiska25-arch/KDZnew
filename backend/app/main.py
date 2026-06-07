@@ -1,8 +1,8 @@
 from fastapi import FastAPI     # основной фреймворк для создания REST API
 from fastapi.middleware.cors import CORSMiddleware  # для запросов с других адресов
-from db.database import engine, Base
 from .routers import couriers, orders, auth
-from db.createDbUsers import create_users, reset_database     # создаёт тестовых пользователей
+from .db.database import engine, Base
+from .db.createDbUsers import create_users, reset_database    # создаёт тестовых пользователей
 
 # Создаём таблицы в БД при старте
 Base.metadata.create_all(bind=engine)

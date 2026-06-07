@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from db.database import get_db
+from ..db.database import get_db
 from .. import schemas
-from db import models, crud, utils
+from ..db import crud, models, utils
 
 # Позволяет вынести маршруты, связанные с курьерами, в отдельный файл
 router = APIRouter()

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from db.database import SessionLocal, Base, engine
-from db import models, crud
+from .database import SessionLocal, Base, engine
+from . import models, crud
 
 
 def create_users():

@@ -4,9 +4,9 @@
 """
 
 from sqlalchemy.orm import Session
-from app import schemas
-from db import models
+from .. import schemas
 from typing import List
+from . import models
 
 def get_user_by_username(db: Session, username: str):
     # Метод .first() возвращает первый найденный объект или None, если такого пользователя нет.
