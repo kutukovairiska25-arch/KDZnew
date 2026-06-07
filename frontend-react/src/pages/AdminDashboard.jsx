@@ -95,7 +95,19 @@ const [ordersImport, setOrdersImport] = useState(`[
       alert('Ошибка: ' + e.message);
     }
   };
+    const handleDeleteOrder = async (orderId) => {
+      if (!confirm(`Удалить заказ #${orderId}? Это действие нельзя отменить.`)) {
+        return;
+      }
 
+      try {
+        await api.delete(`/orders/${orderId}`);
+        alert(`Заказ #${orderId} удалён`);
+        loadOrders();
+      } catch (error) {
+        alert('Ошибка удаления заказа: ' + error.message);
+      }
+    };
   const handleEditCourier = (courier) => {
     setEditingCourier(courier);
     setEditForm({
@@ -216,6 +228,7 @@ const [ordersImport, setOrdersImport] = useState(`[
                       <th>Регион</th>
                       <th>Статус</th>
                       <th>Курьер</th>
+                      <th>Действия</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -226,6 +239,17 @@ const [ordersImport, setOrdersImport] = useState(`[
                         <td>{order.region}</td>
                         <td>{order.status}</td>
                         <td>{order.assigned_courier_id || '-'}</td>
+                        <td>
+                          <button
+                            onClick={() => handleDeleteOrder(order.order_id)}
+                            className="action-btn"
+                            style={{
+                              background: 'linear-gradient(135deg, #FF6B9D 0%, #FF8FB1 100%)'
+                            }}
+                          >
+                            🗑️ Удалить
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

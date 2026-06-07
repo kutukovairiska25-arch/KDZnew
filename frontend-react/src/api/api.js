@@ -66,4 +66,8 @@ export const api = {
     method: 'PATCH',
     body: JSON.stringify(data),
   }),
+
+  delete: (endpoint) => api.request(endpoint, {
+    method: 'DELETE',
+  }),
 };
