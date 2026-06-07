@@ -164,6 +164,14 @@ export default function CourierDashboard() {
                     <div style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: '8px' }}>Заработок</div>
                     <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{profile.earnings || 0} ₽</div>
                   </div>
+                  <div style={{ padding: '20px', background: 'linear-gradient(135deg, #FFB6C1 0%, #FFD6E0 100%)', borderRadius: '16px', color: 'white', boxShadow: '0 8px 24px rgba(255, 182, 193, 0.3)' }}>
+                    <div style={{ fontSize: '0.9rem', opacity: '0.9', marginBottom: '8px' }}>🕐 Рабочие часы</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: '600', marginTop: '8px' }}>
+                      {profile.working_hours && profile.working_hours.length > 0
+                        ? profile.working_hours.join(', ')
+                        : 'Не указаны'}
+                    </div>
+                    </div>
                 </div>
             </div>
             <button
