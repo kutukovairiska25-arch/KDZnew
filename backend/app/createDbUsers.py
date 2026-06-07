@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from .database import SessionLocal
+from .database import SessionLocal, Base, engine
 from . import crud, models
 
 
@@ -53,3 +53,9 @@ def create_users():
 
     finally:
         db.close()
+
+
+def reset_database():
+    """Удаляет все таблицы и создает их заново (для разработки)"""
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)

@@ -54,13 +54,11 @@ export default function CourierDashboard() {
       try {
         const allOrders = await api.get(`/couriers/${courierId}/orders`);
 
-        // Получаем УНИКАЛЬНЫЕ заказы (по order_id)
+        // Создаем Map для хранения УНИКАЛЬНЫХ заказов (по order_id)
         const uniqueOrdersMap = new Map();
         allOrders.forEach(order => {
-          // Если заказ с таким ID еще не встречался или его статус важнее
-          if (!uniqueOrdersMap.has(order.order_id)) {
-            uniqueOrdersMap.set(order.order_id, order);
-          }
+          // Храним только последнюю версию каждого заказа
+          uniqueOrdersMap.set(order.order_id, order);
         });
 
         const uniqueOrders = Array.from(uniqueOrdersMap.values());
@@ -68,10 +66,8 @@ export default function CourierDashboard() {
         const statsData = {
           total: uniqueOrders.length,
           completed: uniqueOrders.filter(o => o.status === 'completed').length,
-          cancelled: uniqueOrders.filter(o =>
-            o.status === 'cancelled' ||
-            (o.status === 'new' && o.cancelled_by_courier_id === parseInt(courierId))
-          ).length,
+          // Считаем отмененными заказы, где cancelled_by_courier_id === courierId
+          cancelled: uniqueOrders.filter(o => o.cancelled_by_courier_id === parseInt(courierId)).length,
           active: uniqueOrders.filter(o => o.status === 'assigned').length
         };
 
@@ -87,7 +83,6 @@ export default function CourierDashboard() {
           courier_id: parseInt(courierId),
         });
 
-        // Исправлено: было response.order_ids
         const orderIds = response.orders || [];
 
         if (orderIds.length === 0) {
@@ -98,6 +93,7 @@ export default function CourierDashboard() {
           loadStats();
         }
       } catch (error) {
+        // Здесь будет показана ошибка о лимите в 3 заказа
         alert('Ошибка получения заказов: ' + error.message);
       }
   };

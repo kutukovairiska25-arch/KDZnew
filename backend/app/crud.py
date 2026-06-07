@@ -68,7 +68,8 @@ def create_orders(db: Session, data: list[schemas.OrderItem]) -> list[int]:
     db.commit()
     return ids
 
-def get_courier_orders(db: Session, courier_id: int) -> List[models.Order]:
+def get_courier_orders(db: Session, courier_id: int) -> list[models.Order]:
+    # Возвращаем заказы, которые назначены курьеру ИЛИ которые он отменил
     return db.query(models.Order).filter(
         (models.Order.assigned_courier_id == courier_id) |
         (models.Order.cancelled_by_courier_id == courier_id)

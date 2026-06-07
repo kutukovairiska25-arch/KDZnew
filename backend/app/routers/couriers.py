@@ -132,5 +132,5 @@ def get_courier_orders(courier_id: int, db: Session = Depends(get_db)):
         "delivery_hours": o.delivery_hours,
         "status": o.status,
         "assign_time": str(o.assign_time) if o.assign_time else None,
-        "cancelled_by_courier_id": o.cancelled_by_courier_id  # ДОБАВЛЕНО
+        "cancelled_by_courier_id": o.cancelled_by_courier_id  # Добавляем это поле
     } for o in orders]
