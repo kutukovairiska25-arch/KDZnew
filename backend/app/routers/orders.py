@@ -81,3 +81,29 @@ def complete_order(req: schemas.OrdersCompletePostRequest, db: Session = Depends
     order.completion_time = datetime.fromisoformat(req.complete_time.replace("Z", "+00:00"))
     db.commit()
     return {"order_id": order.order_id}
+
+
+@router.patch("/{order_id}/cancel")
+async def cancel_order(
+        order_id: int,
+        db: Session = Depends(get_db)
+):
+    """
+    Отмена заказа курьером
+    """
+    order = db.query(Order).filter(Order.order_id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Заказ не найден")
+
+    if order.status != "assigned":
+        raise HTTPException(status_code=400, detail="Можно отменить только назначенный заказ")
+
+    # Обновляем статус
+    order.status = "cancelled"
+    order.assigned_courier_id = None
+    order.assign_time = None
+
+    db.commit()
+    db.refresh(order)
+
+    return {"message": "Заказ отменён", "order_id": order_id}

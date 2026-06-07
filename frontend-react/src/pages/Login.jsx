@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/api';
+import './Login.css';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -17,6 +18,7 @@ export default function Login() {
     try {
       const data = await api.post('/api/login', { username, password });
 
+      // Сохраняем данные
       localStorage.setItem('access_token', data.access_token);
       localStorage.setItem('role', data.role);
 
@@ -24,100 +26,63 @@ export default function Login() {
         localStorage.setItem('courier_id', data.courier_id.toString());
       }
 
+      // Перенаправляем в зависимости от роли
       if (data.role === 'admin') {
         navigate('/admin');
       } else if (data.role === 'courier') {
         navigate('/courier');
       } else {
-        setError('Неизвестная роль: ' + data.role);
+        setError('Неизвестная роль пользователя');
+        setLoading(false);
       }
     } catch (err) {
-      setError(err.message || 'Ошибка входа');
-    } finally {
+      setError(err.message || 'Не удалось подключиться к серверу');
       setLoading(false);
     }
   };
 
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '100vh',
-      backgroundColor: '#f0f2f5'
-    }}>
-      <div style={{
-        backgroundColor: 'white',
-        padding: '40px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-        width: '100%',
-        maxWidth: '400px'
-      }}>
-        <h1 style={{ textAlign: 'center', marginBottom: '30px', color: '#333' }}>
-          Candy Delivery
-        </h1>
+    <div className="login-page">
+      <div className="login-box">
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '20px' }}>
+          <h2>LOGIN</h2>
+
+          {error && <div className="error-message">{error}</div>}
+
+          <div className="input-group">
+            <i className="fas fa-user"></i>
             <input
               type="text"
-              placeholder="Логин"
+              id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              placeholder=" "
               required
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
             />
+            <label>Username</label>
           </div>
-          <div style={{ marginBottom: '20px' }}>
+
+          <div className="input-group">
+            <i className="fas fa-lock"></i>
             <input
               type="password"
-              placeholder="Пароль"
+              id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder=" "
               required
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
             />
+            <label>Password</label>
           </div>
-          {error && (
-            <div style={{
-              color: 'red',
-              marginBottom: '20px',
-              textAlign: 'center',
-              padding: '10px',
-              backgroundColor: '#ffe6e6',
-              borderRadius: '4px'
-            }}>
-              {error}
-            </div>
-          )}
+
           <button
             type="submit"
+            className="login-btn"
             disabled={loading}
-            style={{
-              width: '100%',
-              padding: '12px',
-              backgroundColor: loading ? '#999' : '#3498db',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              fontSize: '16px',
-              cursor: loading ? 'not-allowed' : 'pointer'
-            }}
           >
-            {loading ? 'Вход...' : 'Войти'}
+            {loading ? 'Verifying...' : 'Sign In'}
           </button>
+
         </form>
       </div>
     </div>
