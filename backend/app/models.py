@@ -33,6 +33,8 @@ class Order(Base):
     assigned_courier_id = Column(Integer, ForeignKey("couriers.courier_id"), nullable=True)
     assign_time = Column(DateTime, nullable=True)   # Время, когда заказ был назначен.
     completion_time = Column(DateTime, nullable=True)
+    # ID курьера, который отменил заказ (для статистики)
+    cancelled_by_courier_id = Column(Integer, nullable=True)
     courier_type_at_assign = Column(String, nullable=True)
     # Например, курьер получил заказ как "car" (коэффициент 9).
     # Пока он вез заказ, админ изменил его тип на "foot".

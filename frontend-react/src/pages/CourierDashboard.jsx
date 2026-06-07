@@ -51,41 +51,55 @@ export default function CourierDashboard() {
   };
 
   const loadStats = async () => {
-    try {
-      // Получаем все заказы курьера (включая завершённые и отменённые)
-      const allOrders = await api.get(`/couriers/${courierId}/orders`);
+      try {
+        const allOrders = await api.get(`/couriers/${courierId}/orders`);
 
-      const statsData = {
-        total: allOrders.length,
-        completed: allOrders.filter(o => o.status === 'completed').length,
-        cancelled: allOrders.filter(o => o.status === 'cancelled').length,
-        active: allOrders.filter(o => o.status === 'assigned').length
-      };
+        // Получаем УНИКАЛЬНЫЕ заказы (по order_id)
+        const uniqueOrdersMap = new Map();
+        allOrders.forEach(order => {
+          // Если заказ с таким ID еще не встречался или его статус важнее
+          if (!uniqueOrdersMap.has(order.order_id)) {
+            uniqueOrdersMap.set(order.order_id, order);
+          }
+        });
 
-      setStats(statsData);
-    } catch (error) {
-      console.error('Ошибка загрузки статистики:', error);
-    }
+        const uniqueOrders = Array.from(uniqueOrdersMap.values());
+
+        const statsData = {
+          total: uniqueOrders.length,
+          completed: uniqueOrders.filter(o => o.status === 'completed').length,
+          cancelled: uniqueOrders.filter(o =>
+            o.status === 'cancelled' ||
+            (o.status === 'new' && o.cancelled_by_courier_id === parseInt(courierId))
+          ).length,
+          active: uniqueOrders.filter(o => o.status === 'assigned').length
+        };
+
+        setStats(statsData);
+      } catch (error) {
+        console.error('Ошибка загрузки статистики:', error);
+      }
   };
 
   const handleGetOrders = async () => {
-    try {
-      const response = await api.post('/orders/assign', {
-        courier_id: parseInt(courierId),
-      });
+      try {
+        const response = await api.post('/orders/assign', {
+          courier_id: parseInt(courierId),
+        });
 
-      const orderIds = response.order_ids || [];
+        // Исправлено: было response.order_ids
+        const orderIds = response.orders || [];
 
-      if (orderIds.length === 0) {
-        alert('Нет доступных заказов для назначения');
-      } else {
-        alert(`Назначено заказов: ${orderIds.length}`);
-        loadOrders();
-        loadStats();
+        if (orderIds.length === 0) {
+          alert('Нет доступных заказов для назначения');
+        } else {
+          alert(`Назначено заказов: ${orderIds.length}`);
+          loadOrders();
+          loadStats();
+        }
+      } catch (error) {
+        alert('Ошибка получения заказов: ' + error.message);
       }
-    } catch (error) {
-      alert('Ошибка получения заказов: ' + error.message);
-    }
   };
 
   const handleCompleteOrder = async (orderId) => {

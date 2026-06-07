@@ -89,27 +89,29 @@ def assign_orders(req: schemas.OrdersAssignPostRequest, db: Session = Depends(ge
 # Завершение заказа
 @router.post("/orders/complete")
 def complete_order(req: schemas.OrdersCompletePostRequest, db: Session = Depends(get_db)):
+    # Находим заказ в базе данных
     order = db.query(models.Order).filter(models.Order.order_id == req.order_id).first()
-    # заказ должен существовать, быть назначенным ИМЕННО этому курьеру
-    # и находиться в статусе "assigned".
+
+    # Проверяем, что заказ существует, назначен именно этому курьеру и находится в статусе "assigned"
     if not order or order.assigned_courier_id != req.courier_id or order.status != "assigned":
         raise HTTPException(400, "Invalid order or state")
 
     order.status = "completed"
+
     # Фронтенд присылает время в формате ISO с 'Z' на конце (UTC).
     # Python лучше понимает '+00:00', поэтому делаем замену перед парсингом.
     order.completion_time = datetime.fromisoformat(req.complete_time.replace("Z", "+00:00"))
+
+    # Сохраняем изменения в базе данных
     db.commit()
     return {"order_id": order.order_id}
 
-@router.patch("/orders/{order_id}/cancel")  # Добавлен префикс "/orders/"
+
+@router.patch("/orders/{order_id}/cancel")
 async def cancel_order(
-    order_id: int,
-    db: Session = Depends(get_db)
+        order_id: int,
+        db: Session = Depends(get_db)
 ):
-    """
-    Отмена заказа курьером
-    """
     order = db.query(models.Order).filter(models.Order.order_id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Заказ не найден")
@@ -117,8 +119,11 @@ async def cancel_order(
     if order.status != "assigned":
         raise HTTPException(status_code=400, detail="Можно отменить только назначенный заказ")
 
-    # Обновляем статус
-    order.status = "cancelled"
+    # Запоминаем, кто отменил заказ, чтобы он остался в его статистике
+    order.cancelled_by_courier_id = order.assigned_courier_id
+
+    # Возвращаем заказ в общий пул
+    order.status = "new"
     order.assigned_courier_id = None
     order.assign_time = None
 

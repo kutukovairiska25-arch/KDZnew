@@ -5,6 +5,7 @@
 
 from sqlalchemy.orm import Session
 from . import models, schemas
+from typing import List
 
 def get_user_by_username(db: Session, username: str):
     # Метод .first() возвращает первый найденный объект или None, если такого пользователя нет.
@@ -19,11 +20,11 @@ def create_user(db: Session, username: str, password: str, role: str, courier_id
     return db_user
 
 # Получение списков
-def get_all_couriers(db: Session) -> list[models.Courier]:
+def get_all_couriers(db: Session) -> List[models.Courier]:
     # запросы .all() возвращают список всех объектов из соответствующих таблиц.
     return db.query(models.Courier).all()
 
-def get_all_orders(db: Session) -> list[models.Order]:
+def get_all_orders(db: Session) -> List[models.Order]:
     return db.query(models.Order).all()
 
 # Массовое создание
@@ -67,5 +68,8 @@ def create_orders(db: Session, data: list[schemas.OrderItem]) -> list[int]:
     db.commit()
     return ids
 
-def get_courier_orders(db: Session, courier_id: int) -> list[models.Order]:
-    return db.query(models.Order).filter(models.Order.assigned_courier_id == courier_id).all()
+def get_courier_orders(db: Session, courier_id: int) -> List[models.Order]:
+    return db.query(models.Order).filter(
+        (models.Order.assigned_courier_id == courier_id) |
+        (models.Order.cancelled_by_courier_id == courier_id)
+    ).all()
