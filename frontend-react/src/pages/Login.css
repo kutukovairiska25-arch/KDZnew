@@ -1,26 +1,19 @@
- /*
-Делает из скучного HTML красивый интерфейс.
-Фишки в коде:
-- backdrop-filter: blur(12px): Создает эффект матового стекла
-- background-image: url(...): фото гор на фоне
-- .input-group input:focus ~ label: Магия CSS. Когда ты кликаешь на поле, лейбл
-                            (надпись "Username") плавно уезжает наверх и уменьшается.
-- transition: Делает все анимации плавными (кнопка при наведении, появление подсветки).
-*/
+/* Login.css - Glassmorphism Login */
 
-* {
+/* Сброс стилей ТОЛЬКО для страницы логина */
+.login-page * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'MyCustomFont', 'Poppins', sans-serif;
 }
 
-body {
+.login-page {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-image: url('/static/images/candy1.jpg');
+    background-image: url('/images/candy1.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -29,14 +22,14 @@ body {
     position: relative;
 }
 
-body::before {
+.login-page::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(15, 23, 42, 0.25); /* Затемнение фона */
+    background: rgba(15, 23, 42, 0.25);
     z-index: 1;
 }
 
@@ -44,7 +37,6 @@ body::before {
     position: relative;
     width: 380px;
     padding: 50px 40px;
-    /* Эффект стекла */
     background: rgba(255, 255, 255, 0.05);
     border-radius: 16px;
     backdrop-filter: blur(12px);
@@ -54,7 +46,7 @@ body::before {
     z-index: 10;
 }
 
-h2 {
+.login-box h2 {
     color: #ffffff;
     text-align: center;
     margin-bottom: 45px;
@@ -98,19 +90,18 @@ h2 {
     transition: 0.3s ease;
 }
 
-/* Анимация лейбла при клике */
+/* Анимация лейбла при фокусе или когда поле заполнено */
 .input-group input:focus ~ label,
-.input-group input:valid ~ label {
+.input-group input:not(:placeholder-shown) ~ label {
     top: -18px;
     left: 0;
     font-size: 12px;
-    color: #38bdf8; /* Голубой цвет */
+    color: #38bdf8;
     font-weight: 500;
 }
 
-/* Анимация иконки при клике */
 .input-group input:focus ~ i,
-.input-group input:valid ~ i {
+.input-group input:not(:placeholder-shown) ~ i {
     color: #38bdf8;
 }
 
@@ -121,7 +112,7 @@ h2 {
 .login-btn {
     width: 100%;
     padding: 14px;
-    background: #0ea5e9; /* Голубая кнопка */
+    background: #0ea5e9;
     border: none;
     border-radius: 8px;
     color: #ffffff;
@@ -134,14 +125,19 @@ h2 {
     margin-top: 10px;
 }
 
-.login-btn:hover {
+.login-btn:hover:not(:disabled) {
     background: #0284c7;
     box-shadow: 0 10px 20px rgba(14, 165, 233, 0.3);
     transform: translateY(-1px);
 }
 
-.login-btn:active {
+.login-btn:active:not(:disabled) {
     transform: translateY(0);
+}
+
+.login-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 .signup-link {
@@ -161,4 +157,16 @@ h2 {
 .signup-link a:hover {
     color: #7dd3fc;
     text-decoration: underline;
+}
+
+/* Сообщение об ошибке */
+.error-message {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #fecaca;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 14px;
 }
