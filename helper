@@ -13,4 +13,3 @@ requirements.txt - Имя файла, куда сохранится список
 
     pytest backend/tests -v
 Флаг -v выводит подробный отчет по каждому тесту
-В PyCharm вы также можете нажать правой кнопкой мыши на папку tests и выбрать Run 'pytest in tests'.
