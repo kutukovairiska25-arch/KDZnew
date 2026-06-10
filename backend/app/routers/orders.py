@@ -161,10 +161,10 @@ def delete_order(order_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Заказ не найден")
 
     # Проверяем, что заказ не назначен курьеру (нельзя удалить активный заказ)
-    if order.status == "assigned":
+    if order.status in ["assigned", "completed"]:
         raise HTTPException(
             status_code=400,
-            detail="Нельзя удалить назначенный заказ. Сначала отмените его."
+            detail="Нельзя удалить назначенный или завершённый заказ"
         )
 
     db.delete(order)

@@ -65,7 +65,7 @@ def calculate_rating(orders: list[models.Order]) -> float | None:
     t_min = min(region_avgs)
 
     # Формула из ТЗ: (60*60 - min(t, 60*60))/(60*60) * 5
-    rating = (3600 - min(t_min, 3600)) / 3600 * 5
+    rating = (300 - min(t_min, 300)) / 300 * 5
     return round(rating, 2)
 
 # Расчет заработка

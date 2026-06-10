@@ -34,16 +34,14 @@ const [ordersImport, setOrdersImport] = useState(`[
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    const role = localStorage.getItem('role');
-
-    if (!token || role !== 'admin') {
-      navigate('/');
-      return;
-    }
-
-    loadCouriers();
-    loadOrders();
+      const token = sessionStorage.getItem('access_token');
+      const role = sessionStorage.getItem('role');
+      if (!token || role !== 'admin') {
+        navigate('/');
+        return;
+      }
+      loadCouriers();
+      loadOrders();
   }, []);
 
   const loadCouriers = async () => {
@@ -65,36 +63,81 @@ const [ordersImport, setOrdersImport] = useState(`[
   };
 
   const handleImportCouriers = async () => {
-    if (!couriersImport.trim()) {
-      alert('Введите JSON с данными курьеров');
-      return;
-    }
+      if (!couriersImport.trim()) {
+        alert('Введите JSON с данными курьеров');
+        return;
+      }
 
-    try {
-      const parsedData = JSON.parse(couriersImport);
-      await api.post('/couriers', { data: parsedData });
-      alert('Курьеры успешно импортированы');
-      loadCouriers();
-    } catch (e) {
-      alert('Ошибка: ' + e.message);
-    }
+      try {
+        const parsedData = JSON.parse(couriersImport);
+
+        // Проверка времени работы на фронтенде
+        for (const courier of parsedData) {
+          if (courier.working_hours) {
+            for (const hours of courier.working_hours) {
+              const [start, end] = hours.split('-');
+              const [startHour, startMinute] = start.split(':').map(Number);
+              const [endHour, endMinute] = end.split(':').map(Number);
+
+              if (startHour < 7  || endHour > 22 || (endHour === 22 && endMinute > 0)) {
+                alert(`Ошибка для курьера #${courier.courier_id}: курьеры могут работать только с 07:00 до 22:00`);
+                return;
+              }
+            }
+          }
+        }
+
+        await api.post('/couriers', { data: parsedData });
+        alert('Курьеры успешно импортированы');
+        loadCouriers();
+      } catch (e) {
+        alert('Ошибка: ' + e.message);
+      }
   };
 
   const handleImportOrders = async () => {
-    if (!ordersImport.trim()) {
-      alert('Введите JSON с данными заказов');
-      return;
-    }
+      if (!ordersImport.trim()) {
+        alert('Введите JSON с данными заказов');
+        return;
+      }
 
-    try {
-      const parsedData = JSON.parse(ordersImport);
-      await api.post('/orders', { data: parsedData });
-      alert('Заказы успешно импортированы');
-      loadOrders();
-    } catch (e) {
-      alert('Ошибка: ' + e.message);
-    }
+      try {
+        const parsedData = JSON.parse(ordersImport);
+
+        // Проверка времени доставки на фронтенде
+        // Рабочее время курьеров: 07:00-22:00
+        const WORK_START = 7 * 60;  // 420 минут
+        const WORK_END = 22 * 60;   // 1320 минут
+
+        for (const order of parsedData) {
+          if (order.delivery_hours) {
+            for (const hours of order.delivery_hours) {
+              const [start, end] = hours.split('-');
+              const [startHour, startMinute] = start.split(':').map(Number);
+              const [endHour, endMinute] = end.split(':').map(Number);
+
+              const startTotal = startHour * 60 + startMinute;
+              const endTotal = endHour * 60 + endMinute;
+
+              // Проверка пересечения с рабочим временем [07:00, 22:00]
+              // Пересечение есть, если: start < 22:00 AND end > 07:00
+              if (startTotal >= WORK_END || endTotal <= WORK_START) {
+                alert(`Ошибка для заказа #${order.order_id}: время доставки "${hours}" не пересекается с рабочим временем курьеров (07:00-22:00). Курьеры не смогут доставить заказ в этот интервал.`);
+                return;
+              }
+            }
+          }
+        }
+
+        await api.post('/orders', { data: parsedData });
+        alert('Заказы успешно импортированы');
+        loadOrders();
+      } catch (e) {
+        alert('Ошибка: ' + e.message);
+      }
   };
+
+
     const handleDeleteOrder = async (orderId) => {
       if (!confirm(`Удалить заказ #${orderId}? Это действие нельзя отменить.`)) {
         return;
