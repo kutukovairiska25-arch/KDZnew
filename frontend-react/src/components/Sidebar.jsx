@@ -4,9 +4,11 @@ export default function Sidebar({ title, menuItems, activeSection, onSectionChan
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('courier_id');
+    sessionStorage.removeItem('access_token');
+    sessionStorage.removeItem('role');
+    sessionStorage.removeItem('courier_id');
+    // или
+    sessionStorage.clear();
     navigate('/');
   };
 

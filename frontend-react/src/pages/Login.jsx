@@ -19,11 +19,10 @@ export default function Login() {
       const data = await api.post('/api/login', { username, password });
 
       // Сохраняем данные
-      localStorage.setItem('access_token', data.access_token);
-      localStorage.setItem('role', data.role);
-
+      sessionStorage.setItem('access_token', data.access_token);
+      sessionStorage.setItem('role', data.role);
       if (data.courier_id) {
-        localStorage.setItem('courier_id', data.courier_id.toString());
+          sessionStorage.setItem('courier_id', data.courier_id.toString());
       }
 
       // Перенаправляем в зависимости от роли

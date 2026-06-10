@@ -2,7 +2,7 @@ const API_BASE_URL = '';
 
 export const api = {
   async request(endpoint, options = {}) {
-    const token = localStorage.getItem('access_token');
+    const token = sessionStorage.getItem('access_token');
 
     const config = {
       headers: {
@@ -16,9 +16,11 @@ export const api = {
       const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
 
       if (response.status === 401) {
-        localStorage.clear();
-        window.location.href = '/';
-        throw new Error('Сессия истекла. Войдите снова.');
+          sessionStorage.clear();
+          if (window.location.pathname !== '/') {
+              window.location.href = '/';
+          }
+          throw new Error('Сессия истекла. Войдите снова.');
       }
 
       // Читаем тело ответа ОДИН РАЗ и сохраняем в переменную

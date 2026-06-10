@@ -15,21 +15,19 @@ export default function CourierDashboard() {
     active: 0
   });
   const navigate = useNavigate();
-  const courierId = localStorage.getItem('courier_id');
+  const courierId = sessionStorage.getItem('courier_id');
 
-  useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    const role = localStorage.getItem('role');
-
-    if (!token || role !== 'courier' || !courierId) {
-      navigate('/');
-      return;
-    }
-
-    loadProfile();
-    loadOrders();
-    loadStats();
-  }, []);
+   useEffect(() => {
+       const token = sessionStorage.getItem('access_token');
+       const role = sessionStorage.getItem('role');
+       if (!token || role !== 'courier' || !courierId) {
+         navigate('/');
+         return;
+       }
+       loadProfile();
+       loadOrders();
+       loadStats();
+   }, []);
 
   const loadProfile = async () => {
     try {
