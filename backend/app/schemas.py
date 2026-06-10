@@ -28,8 +28,14 @@ class CourierItem(BaseModel):
 
     @field_validator('working_hours')
     @classmethod
-    def validate_working_hours(cls, v: List[str]) -> List[str]:
-        """Проверяет, что время работы в диапазоне 07:00-22:00"""
+    def validate_working_hours(cls, v: List[str] | None) -> List[str] | None:
+        """Проверяет, что время работы строго в диапазоне 07:00-22:00"""
+        if v is None:
+            return v
+
+        WORK_START = 7 * 60  # 07:00 = 420 минут
+        WORK_END = 22 * 60  # 22:00 = 1320 минут
+
         for hours in v:
             try:
                 start_str, end_str = hours.split('-')
@@ -38,36 +44,29 @@ class CourierItem(BaseModel):
                 end_hour = int(end_str.split(':')[0])
                 end_minute = int(end_str.split(':')[1])
 
-                # Проверка формата времени
                 if not (0 <= start_hour <= 23 and 0 <= start_minute <= 59):
-                    raise ValueError(
-                        f"Неверное время начала: {start_str}. Ожидается формат HH:MM (часы 00-23, минуты 00-59)")
+                    raise ValueError(f"Неверное время начала: {start_str}")
                 if not (0 <= end_hour <= 23 and 0 <= end_minute <= 59):
-                    raise ValueError(
-                        f"Неверное время окончания: {end_str}. Ожидается формат HH:MM (часы 00-23, минуты 00-59)")
+                    raise ValueError(f"Неверное время окончания: {end_str}")
 
-                # Проверка диапазона 07:00-22:00
-                if start_hour < 7:
-                    raise ValueError(
-                        f"Время начала работы {hours} раньше 07:00. Курьеры могут работать только с 07:00 до 22:00")
-                if end_hour > 22:
-                    raise ValueError(
-                        f"Время окончания работы {hours} позже 22:00. Курьеры могут работать только с 07:00 до 22:00")
-                if end_hour == 22 and end_minute > 0:
-                    raise ValueError(
-                        f"Время окончания работы {hours} позже 22:00. Курьеры могут работать только с 07:00 до 22:00")
-
-                # Проверка, что время начала раньше времени окончания
                 start_total = start_hour * 60 + start_minute
                 end_total = end_hour * 60 + end_minute
+
+                # Строгая проверка диапазона
+                if start_total < WORK_START:
+                    raise ValueError(
+                        f"Время начала {hours} раньше 07:00. Рабочее время должно быть строго в диапазоне с 07:00 до 22:00.")
+                if end_total > WORK_END:
+                    raise ValueError(
+                        f"Время окончания {hours} позже 22:00. Рабочее время должно быть строго в диапазоне с 07:00 до 22:00.")
+
                 if start_total >= end_total:
                     raise ValueError(f"Время начала ({start_str}) должно быть раньше времени окончания ({end_str})")
 
             except ValueError as e:
-                if "время" in str(e).lower() or "неверное" in str(e).lower():
+                if "время" in str(e).lower() or "раньше" in str(e).lower() or "позже" in str(e).lower():
                     raise ValueError(str(e))
-                raise ValueError(
-                    f"Неверный формат времени: {hours}. Ожидается формат HH:MM-HH:MM (например, 09:00-18:00)")
+                raise ValueError(f"Неверный формат времени: {hours}. Ожидается HH:MM-HH:MM")
 
         return v
 
@@ -77,6 +76,50 @@ class CourierUpdateRequest(BaseModel):
     courier_type: Optional[str] = None
     regions: Optional[List[int]] = None
     working_hours: Optional[List[str]] = None
+
+    @field_validator('working_hours')
+    @classmethod
+    def validate_working_hours(cls, v: List[str] | None) -> List[str] | None:
+        """Проверяет, что время работы строго в диапазоне 07:00-22:00"""
+        if v is None:
+            return v
+
+        WORK_START = 7 * 60  # 07:00 = 420 минут
+        WORK_END = 22 * 60  # 22:00 = 1320 минут
+
+        for hours in v:
+            try:
+                start_str, end_str = hours.split('-')
+                start_hour = int(start_str.split(':')[0])
+                start_minute = int(start_str.split(':')[1])
+                end_hour = int(end_str.split(':')[0])
+                end_minute = int(end_str.split(':')[1])
+
+                if not (0 <= start_hour <= 23 and 0 <= start_minute <= 59):
+                    raise ValueError(f"Неверное время начала: {start_str}")
+                if not (0 <= end_hour <= 23 and 0 <= end_minute <= 59):
+                    raise ValueError(f"Неверное время окончания: {end_str}")
+
+                start_total = start_hour * 60 + start_minute
+                end_total = end_hour * 60 + end_minute
+
+                # Строгая проверка диапазона
+                if start_total < WORK_START:
+                    raise ValueError(
+                        f"Время начала {hours} раньше 07:00. Рабочее время должно быть строго в диапазоне с 07:00 до 22:00.")
+                if end_total > WORK_END:
+                    raise ValueError(
+                        f"Время окончания {hours} позже 22:00. Рабочее время должно быть строго в диапазоне с 07:00 до 22:00.")
+
+                if start_total >= end_total:
+                    raise ValueError(f"Время начала ({start_str}) должно быть раньше времени окончания ({end_str})")
+
+            except ValueError as e:
+                if "время" in str(e).lower() or "раньше" in str(e).lower() or "позже" in str(e).lower():
+                    raise ValueError(str(e))
+                raise ValueError(f"Неверный формат времени: {hours}. Ожидается HH:MM-HH:MM")
+
+        return v
 
 #
 class CourierGetResponse(BaseModel):

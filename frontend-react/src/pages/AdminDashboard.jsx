@@ -67,11 +67,13 @@ const [ordersImport, setOrdersImport] = useState(`[
         alert('Введите JSON с данными курьеров');
         return;
       }
-
       try {
         const parsedData = JSON.parse(couriersImport);
 
-        // Проверка времени работы на фронтенде
+        // Проверка времени работы (строго 07:00 - 22:00)
+        const WORK_START = 7 * 60;
+        const WORK_END = 22 * 60;
+
         for (const courier of parsedData) {
           if (courier.working_hours) {
             for (const hours of courier.working_hours) {
@@ -79,8 +81,15 @@ const [ordersImport, setOrdersImport] = useState(`[
               const [startHour, startMinute] = start.split(':').map(Number);
               const [endHour, endMinute] = end.split(':').map(Number);
 
-              if (startHour < 7  || endHour > 22 || (endHour === 22 && endMinute > 0)) {
-                alert(`Ошибка для курьера #${courier.courier_id}: курьеры могут работать только с 07:00 до 22:00`);
+              const startTotal = startHour * 60 + startMinute;
+              const endTotal = endHour * 60 + endMinute;
+
+              if (startTotal < WORK_START) {
+                alert(`Ошибка для курьера #${courier.courier_id}: время начала "${hours}" раньше 07:00. Рабочее время должно быть строго в диапазоне с 07:00 до 22:00.`);
+                return;
+              }
+              if (endTotal > WORK_END) {
+                alert(`Ошибка для курьера #${courier.courier_id}: время окончания "${hours}" позже 22:00. Рабочее время должно быть строго в диапазоне с 07:00 до 22:00.`);
                 return;
               }
             }
@@ -165,31 +174,63 @@ const [ordersImport, setOrdersImport] = useState(`[
   };
 
   const handleSaveCourier = async (e) => {
-    e.preventDefault();
+      e.preventDefault();
 
-    const regionsArray = editForm.regions
-      .split(',')
-      .map(r => parseInt(r.trim()))
-      .filter(r => !isNaN(r));
+      const regionsArray = editForm.regions
+        .split(',')
+        .map(r => parseInt(r.trim()))
+        .filter(r => !isNaN(r));
 
-    const hoursArray = editForm.working_hours
-      .split(',')
-      .map(h => h.trim())
-      .filter(h => h);
+      const hoursArray = editForm.working_hours
+        .split(',')
+        .map(h => h.trim())
+        .filter(h => h);
 
-    try {
-      await api.patch(`/couriers/${editingCourier.courier_id}`, {
-        courier_type: editForm.courier_type,
-        regions: regionsArray,
-        working_hours: hoursArray,
-      });
+      // Проверка времени работы (строго 07:00 - 22:00)
+      const WORK_START = 7 * 60;  // 420
+      const WORK_END = 22 * 60;   // 1320
 
-      alert('Данные курьера обновлены');
-      handleCloseModal();
-      loadCouriers();
-    } catch (error) {
-      alert('Ошибка обновления: ' + error.message);
-    }
+      for (const hours of hoursArray) {
+        const [start, end] = hours.split('-');
+        if (!start || !end) {
+          alert(`Ошибка: неверный формат времени "${hours}". Ожидается HH:MM-HH:MM`);
+          return;
+        }
+        const [startHour, startMinute] = start.split(':').map(Number);
+        const [endHour, endMinute] = end.split(':').map(Number);
+
+        if (isNaN(startHour) || isNaN(startMinute) || isNaN(endHour) || isNaN(endMinute)) {
+          alert(`Ошибка: неверный формат времени "${hours}". Ожидается HH:MM-HH:MM`);
+          return;
+        }
+
+        const startTotal = startHour * 60 + startMinute;
+        const endTotal = endHour * 60 + endMinute;
+
+        // Строгая проверка диапазона
+        if (startTotal < WORK_START) {
+          alert(`Ошибка: время начала "${hours}" раньше 07:00. Рабочее время должно быть строго в диапазоне с 07:00 до 22:00.`);
+          return;
+        }
+        if (endTotal > WORK_END) {
+          alert(`Ошибка: время окончания "${hours}" позже 22:00. Рабочее время должно быть строго в диапазоне с 07:00 до 22:00.`);
+          return;
+        }
+      }
+
+      try {
+        await api.patch(`/couriers/${editingCourier.courier_id}`, {
+          courier_type: editForm.courier_type,
+          regions: regionsArray,
+          working_hours: hoursArray,
+        });
+
+        alert('Данные курьера обновлены');
+        handleCloseModal();
+        loadCouriers();
+      } catch (error) {
+        alert('Ошибка обновления: ' + error.message);
+      }
   };
 
   const menuItems = [
