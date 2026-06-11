@@ -1,0 +1,85 @@
+/* Подключаем кастомный шрифт */
+@font-face {
+  font-family: 'MyCustomFont';
+  src: url('./fonts/Marker.otf') format('truetype');
+  /* Если у тебя .woff2, используй: */
+  /* src: url('./fonts/MyFont.woff2') format('woff2'); */
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Глобальные стили */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'MyCustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 18px; /* ⬆️ Увеличили базовый размер шрифта (было 16px) */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  color: #2d3748;
+  line-height: 1.6; /* Добавили межстрочный интервал для удобства чтения */
+}
+
+/* Увеличиваем заголовки */
+h1 {
+  font-size: 2.5rem; /* Было 2rem */
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+h2 {
+  font-size: 2rem; /* Было 1.5rem */
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 1rem;
+}
+
+h3 {
+  font-size: 1.5rem; /* Было 1.2rem */
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1rem;
+}
+
+/* Кнопки и поля ввода */
+button, input, textarea, select {
+  font-family: inherit;
+  font-size: 1.1rem; /* ⬆️ Текст в кнопках и инпутах тоже крупнее */
+}
+
+/* Заголовки */
+h1, h2, h3 {
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  font-size: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Утилиты */
+.gradient-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
